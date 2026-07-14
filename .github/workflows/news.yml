@@ -1,0 +1,34 @@
+name: יצירת חדשות
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6,12,18 * * *'
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: הורדת הקבצים
+        uses: actions/checkout@v4
+
+      - name: התקנת ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: התקנת כלים
+        run: pip install -r requirements.txt
+
+      - name: יצירת החדשות
+        run: python news.py
+        env:
+          YEMOT_TOKEN: ${{ secrets.YEMOT_TOKEN }}
+
+      - name: שמירת קבצי החדשות
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-file
+          path: |
+            news.txt
+            news.mp3
+            001.wav
