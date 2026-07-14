@@ -88,6 +88,10 @@ except:
 
 for folder, category in categories.items():
 
+
+
+for folder, category in categories.items():
+
     items = []
     seen = set()
 
@@ -99,7 +103,7 @@ for folder, category in categories.items():
 
             title = item.title.strip()
 
-                     if title in seen:
+            if title in seen:
                 continue
 
             if title in old_news:
@@ -111,7 +115,6 @@ for folder, category in categories.items():
             seen.add(title)
             old_news.append(title)
             items.append(title)
-
 
     if not items:
         continue
