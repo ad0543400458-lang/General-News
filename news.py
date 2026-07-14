@@ -3,6 +3,7 @@ import os
 import requests
 from gtts import gTTS
 from pydub import AudioSegment
+import json
 
 # ===========================
 # מקורות RSS
@@ -77,6 +78,14 @@ categories = {
     }
 
 }
+# טעינת כתבות שכבר הוקראו
+
+try:
+    with open("seen_news.json", "r", encoding="utf-8") as f:
+        old_news = json.load(f)
+except:
+    old_news = []
+
 for folder, category in categories.items():
 
     items = []
@@ -90,13 +99,17 @@ for folder, category in categories.items():
 
             title = item.title.strip()
 
-            if title in seen:
+                     if title in seen:
+                continue
+
+            if title in old_news:
                 continue
 
             if not any(keyword in title for keyword in category["keywords"]):
                 continue
 
             seen.add(title)
+            old_news.append(title)
             items.append(title)
 
 
@@ -166,3 +179,6 @@ for folder, category in categories.items():
     )
 
     print(folder, response.text)
+
+with open("seen_news.json", "w", encoding="utf-8") as f:
+    json.dump(old_news[-200:], f, ensure_ascii=False, indent=2)
