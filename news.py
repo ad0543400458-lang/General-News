@@ -29,7 +29,7 @@ sources = [
     "https://news.google.com/rss/search?q=שיכון+ד'+טבריה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שיכון+ד&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he"
-]]
+]
 
 # ===========================
 # מילות סינון
