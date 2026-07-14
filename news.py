@@ -86,8 +86,6 @@ try:
 except:
     old_news = []
 
-for folder, category in categories.items():
-
 
 
 for folder, category in categories.items():
