@@ -103,7 +103,7 @@ files = {
 
 data = {
     "token": token,
-    "path": "ivr2:/4/",
+    "path": "ivr2:/1/",
     "autoNumbering": "true",
     "convertAudio": "1"
 }
