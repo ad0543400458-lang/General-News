@@ -16,7 +16,7 @@ import re
 
 categories = {
 
-    "1": {
+    "5": {
         "sources": [
             "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
@@ -78,7 +78,7 @@ categories = {
         ]
     },
 
-        "5": {
+        "1": {
         "sources": [
             # חדשות כלליות
             "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
@@ -171,6 +171,9 @@ for folder, category in categories.items():
             if hasattr(item, "summary"):
                 summary = item.summary.strip()
 
+             
+  
+            
             # ניקוי HTML וסימנים
             summary = re.sub(r'<.*?>', '', summary)
 
@@ -180,18 +183,29 @@ for folder, category in categories.items():
             # הסרת סימנים מיותרים
             summary = re.sub(r'[<>/\[\]{}|*#@]', '', summary)
             summary = re.sub(r'[.,;:"\'()\-%–—-]', '', summary)
+            summary = re.sub(r'[^\u0590-\u05FF0-9., ]', ' ', summary)
+            title = re.sub(r'[^\u0590-\u05FF0-9 ]', ' ', title)
             
             # ניקוי רווחים כפולים
             summary = " ".join(summary.split())
 
             # הסרת כותרת שחוזרת בתוך התקציר
-            if title in summary:
-                summary = summary.replace(title, "")
-                summary = " ".join(summary.split())
-                summary = summary.lstrip(" .,-–—:")
+            title_clean = title.replace(" ", "")
+
+            summary_clean = summary.replace(" ", "")
+
+            if title_clean in summary_clean:
+               summary = summary.replace(title, "")
+
+            summary = " ".join(summary.split())
+
+             # ניקוי סימנים שנשארו בתחילת התקציר
+            summary = summary.lstrip(" .,-–—:")
+               
+                
         
-            # לשלוחה 5 - כותרת + תקציר
-            if folder == "5" and summary:
+            # לשלוחה 1 - כותרת + תקציר
+            if folder == "1" and summary:
                 news_text = title + ". " + summary
             else:
                 news_text = title
@@ -202,7 +216,7 @@ for folder, category in categories.items():
             if title in old_news:
                 continue
 
-            if folder != "5":
+            if folder != "1":
                 if not any(keyword in title for keyword in category["keywords"]):
                     continue
 
@@ -220,10 +234,10 @@ for folder, category in categories.items():
     # ===========================
 
     # ===========================
-    # שלוחה 5 - כל עדכון קובץ נפרד
+    # שלוחות 1 ו-5 - כל עדכון קובץ נפרד
     # ===========================
 
-    if folder == "5":
+    if folder in ["1","5"]:
 
         for index, news in enumerate(items[:15]):
 
@@ -291,7 +305,7 @@ token = os.environ["YEMOT_TOKEN"]
 url = "https://www.call2all.co.il/ym/api/UploadFile"
 
 
-if folder == "5":
+if folder in ["1","5"]:
 
     # קבלת רשימת הקבצים הקיימים בשלוחה
     list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
