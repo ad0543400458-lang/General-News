@@ -305,9 +305,9 @@ token = os.environ["YEMOT_TOKEN"]
 url = "https://www.call2all.co.il/ym/api/UploadFile"
 
 
-if folder in ["1","5"]:
+# העלאה לפי השלוחה האחרונה שנוצרה
+if folder in ["1", "5"]:
 
-    # קבלת רשימת הקבצים הקיימים בשלוחה
     list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
 
     list_data = {
@@ -334,32 +334,31 @@ if folder in ["1","5"]:
                     int(number[0])
                 )
 
-    # העלאה עם מספר חדש גבוה יותר
-    for index, wav_name in enumerate(
-        [f"news_{folder}_{i}.wav" for i in range(len(items[:15]))],
-        start=1
-    ):
+    for index in range(len(items[:15])):
 
-        new_number = max_number + index
+        wav_name = f"news_{folder}_{index}.wav"
 
-        files = {
-            "file": open(wav_name, "rb")
-        }
+        if os.path.exists(wav_name):
 
-        data = {
-            "token": token,
-            "path": f"ivr2:/{folder}/{new_number}.wav",
-            "convertAudio": "1"
-        }
+            new_number = max_number + index + 1
 
-        response = requests.post(
-            url,
-            files=files,
-            data=data
-        )
+            files = {
+                "file": open(wav_name, "rb")
+            }
 
-        print(folder, new_number, response.text)
+            data = {
+                "token": token,
+                "path": f"ivr2:/{folder}/{new_number}.wav",
+                "convertAudio": "1"
+            }
 
+            response = requests.post(
+                url,
+                files=files,
+                data=data
+            )
+
+            print(folder, new_number, response.text)
 
 
 else:
@@ -383,5 +382,25 @@ else:
 
     print(folder, response.text)
 
+
+# שמירת כתבות שכבר הוקראו
+
 with open("seen_news.json", "w", encoding="utf-8") as f:
-    json.dump(old_news[-200:], f, ensure_ascii=False, indent=2)
+    json.dump(
+        old_news[-200:],
+        f,
+        ensure_ascii=False,
+        indent=2
+    )
+
+
+
+# שמירת כתבות שכבר הוקראו
+
+with open("seen_news.json", "w", encoding="utf-8") as f:
+    json.dump(
+        old_news[-200:],
+        f,
+        ensure_ascii=False,
+        indent=2
+    )
