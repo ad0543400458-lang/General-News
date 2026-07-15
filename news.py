@@ -183,37 +183,69 @@ for folder, category in categories.items():
     # יצירת הטקסט להקראה
     # ===========================
 
-    text = ""
+    # ===========================
+    # שלוחה 5 - כל עדכון קובץ נפרד
+    # ===========================
 
-    for i, news in enumerate(items[:15]):
+    if folder == "5":
 
-        text += news.strip()
+        for index, news in enumerate(items[:15]):
 
-        if i != len(items[:15]) - 1:
-            text += "\n\nעדכון נוסף.\n\n"
+            tts = gTTS(news.strip(), lang="iw")
+
+            mp3_name = f"news_{folder}_{index}.mp3"
+            wav_name = f"news_{folder}_{index}.wav"
+
+            tts.save(mp3_name)
+
+            audio = AudioSegment.from_mp3(mp3_name)
+
+            audio = audio.speedup(
+                playback_speed=1.25
+            )
+
+            audio = audio.set_frame_rate(8000)
+            audio = audio.set_channels(1)
+
+            audio.export(
+                wav_name,
+                format="wav"
+            )
 
 
-    # יצירת קול
+    # ===========================
+    # שלוחות 1-4 - נשאר כמו שהיה
+    # ===========================
 
-    tts = gTTS(text, lang="iw")
-    tts.save(f"news_{folder}.mp3")
+    else:
+
+        text = ""
+
+        for i, news in enumerate(items[:15]):
+
+            text += news.strip()
+
+            if i != len(items[:15]) - 1:
+                text += "\n\nעדכון נוסף.\n\n"
 
 
-    # האצת הדיבור
+        tts = gTTS(text, lang="iw")
+        tts.save(f"news_{folder}.mp3")
 
-    audio = AudioSegment.from_mp3(f"news_{folder}.mp3")
 
-    audio = audio.speedup(
-        playback_speed=1.25
-    )
+        audio = AudioSegment.from_mp3(f"news_{folder}.mp3")
 
-    audio = audio.set_frame_rate(8000)
-    audio = audio.set_channels(1)
+        audio = audio.speedup(
+            playback_speed=1.25
+        )
 
-    audio.export(
-        f"news_{folder}.wav",
-        format="wav"
-    )
+        audio = audio.set_frame_rate(8000)
+        audio = audio.set_channels(1)
+
+        audio.export(
+            f"news_{folder}.wav",
+            format="wav"
+        )
 
 
     # העלאה לימות המשיח
