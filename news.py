@@ -298,49 +298,49 @@ for folder, category in categories.items():
         )
 
 
-# העלאה לימות המשיח
+    # העלאה לימות המשיח
 
-token = os.environ["YEMOT_TOKEN"]
+    token = os.environ["YEMOT_TOKEN"]
 
-url = "https://www.call2all.co.il/ym/api/UploadFile"
+    url = "https://www.call2all.co.il/ym/api/UploadFile"
 
 
-# העלאה לפי השלוחה האחרונה שנוצרה
-if folder in ["1", "5"]:
+    if folder in ["1", "5"]:
 
-    list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
+        list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
 
-    list_data = {
-        "token": token,
-        "path": f"ivr2:/{folder}/"
-    }
+        list_data = {
+            "token": token,
+            "path": f"ivr2:/{folder}/"
+        }
 
-    result = requests.post(
-        list_url,
-        data=list_data
-    ).json()
+        result = requests.post(
+            list_url,
+            data=list_data
+        ).json()
 
-    max_number = 0
 
-    if "files" in result:
-        for file in result["files"]:
-            name = file.get("name", "")
+        max_number = 0
 
-            number = re.findall(r'\d+', name)
+        if "files" in result:
+            for file in result["files"]:
+                name = file.get("name", "")
 
-            if number:
-                max_number = max(
-                    max_number,
-                    int(number[0])
-                )
+                number = re.findall(r'\d+', name)
 
-    for index in range(len(items[:15])):
+                if number:
+                    max_number = max(
+                        max_number,
+                        int(number[0])
+                    )
 
-        wav_name = f"news_{folder}_{index}.wav"
 
-        if os.path.exists(wav_name):
+        for index, wav_name in enumerate(
+            [f"news_{folder}_{i}.wav" for i in range(len(items[:15]))],
+            start=1
+        ):
 
-            new_number = max_number + index + 1
+            new_number = max_number + index
 
             files = {
                 "file": open(wav_name, "rb")
@@ -361,26 +361,26 @@ if folder in ["1", "5"]:
             print(folder, new_number, response.text)
 
 
-else:
+    else:
 
-    files = {
-        "file": open(f"news_{folder}.wav", "rb")
-    }
+        files = {
+            "file": open(f"news_{folder}.wav", "rb")
+        }
 
-    data = {
-        "token": token,
-        "path": f"ivr2:/{folder}/",
-        "autoNumbering": "true",
-        "convertAudio": "1"
-    }
+        data = {
+            "token": token,
+            "path": f"ivr2:/{folder}/",
+            "autoNumbering": "true",
+            "convertAudio": "1"
+        }
 
-    response = requests.post(
-        url,
-        files=files,
-        data=data
-    )
+        response = requests.post(
+            url,
+            files=files,
+            data=data
+        )
 
-    print(folder, response.text)
+        print(folder, response.text)
 
 
 # שמירת כתבות שכבר הוקראו
