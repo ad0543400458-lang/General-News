@@ -75,6 +75,65 @@ categories = {
             "עיריית טבריה",
             "נדלן טבריה"
         ]
+    },
+
+        "5": {
+        "sources": [
+            # חדשות כלליות
+            "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=ישראל&hl=he&gl=IL&ceid=IL:he",
+            
+            # כלכלה וכסף
+            "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שוק+ההון&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
+
+            # תחבורה ותשתיות
+            "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
+
+            # מזג אוויר
+            "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
+
+            # טכנולוגיה
+            "https://news.google.com/rss/search?q=טכנולוגיה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בינה+מלאכותית&hl=he&gl=IL&ceid=IL:he",
+
+            # חדשות ערים
+            "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בני+ברק&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=מודיעין+עילית&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=אלעד&hl=he&gl=IL&ceid=IL:he",
+
+            # בריאות ומדע
+            "https://news.google.com/rss/search?q=בריאות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=מדע&hl=he&gl=IL&ceid=IL:he"
+        ],
+
+        "keywords": [
+            "ישראל",
+            "חדשות",
+            "כלכלה",
+            "כסף",
+            "מחירים",
+            "דירות",
+            "נדלן",
+            "בנייה",
+            "תחבורה",
+            "כבישים",
+            "רכבת",
+            "מזג",
+            "טכנולוגיה",
+            "ירושלים",
+            "בית שמש",
+            "בריאות",
+            "מדע"
+        ]
     }
 
 }
@@ -107,13 +166,14 @@ for folder, category in categories.items():
             if title in old_news:
                 continue
 
-            if not any(keyword in title for keyword in category["keywords"]):
-                continue
+            if folder != "5":
+                if not any(keyword in title for keyword in category["keywords"]):
+                    continue
 
             seen.add(title)
             old_news.append(title)
             items.append(title)
-
+            
     if not items:
         continue
 
