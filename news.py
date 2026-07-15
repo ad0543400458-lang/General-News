@@ -4,6 +4,7 @@ import requests
 from gtts import gTTS
 from pydub import AudioSegment
 import json
+import re
 
 # ===========================
 # מקורות RSS
@@ -160,10 +161,27 @@ for folder, category in categories.items():
 
             title = item.title.strip()
 
+            title = re.sub(r'<.*?>', '', title)
+            title = re.sub(r'[A-Za-z]+', '', title)
+            title = " ".join(title.split())
+
             summary = ""
 
             if hasattr(item, "summary"):
                 summary = item.summary.strip()
+
+            # ניקוי HTML וסימנים
+            summary = re.sub(r'<.*?>', '', summary)
+
+            # הסרת מילים באנגלית
+            summary = re.sub(r'[A-Za-z]+', '', summary)
+
+            # הסרת סימנים מיותרים
+            summary = re.sub(r'[<>/\[\]{}|*#@]', '', summary)
+
+            # ניקוי רווחים כפולים
+            summary = " ".join(summary.split())
+
 
             # לשלוחה 5 - כותרת + תקציר
             if folder == "5" and summary:
