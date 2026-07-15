@@ -340,7 +340,7 @@ for folder, category in categories.items():
             start=1
         ):
 
-            new_number = max_number + index
+            new_number = str(max_number + index).zfill(3)
 
             files = {
                 "file": open(wav_name, "rb")
