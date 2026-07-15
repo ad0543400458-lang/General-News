@@ -190,12 +190,14 @@ for folder, category in categories.items():
             summary = " ".join(summary.split())
 
             # הסרת כותרת שחוזרת בתוך התקציר
-            title_clean = title.replace(" ", "")
+            title_compare = re.sub(r'\s+', '', title)
 
-            summary_clean = summary.replace(" ", "")
 
-            if title_clean in summary_clean:
-               summary = summary.replace(title, "")
+            summary_compare = re.sub(r'\s+', '', summary)
+
+            if summary_compare.startswith(title_compare):
+               summary = summary[len(title):].lstrip(" .,:-–—")
+
 
             summary = " ".join(summary.split())
 
@@ -395,12 +397,3 @@ with open("seen_news.json", "w", encoding="utf-8") as f:
 
 
 
-# שמירת כתבות שכבר הוקראו
-
-with open("seen_news.json", "w", encoding="utf-8") as f:
-    json.dump(
-        old_news[-200:],
-        f,
-        ensure_ascii=False,
-        indent=2
-    )
