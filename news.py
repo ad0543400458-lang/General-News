@@ -160,7 +160,18 @@ for folder, category in categories.items():
 
             title = item.title.strip()
 
-            if title in seen:
+            summary = ""
+
+            if hasattr(item, "summary"):
+                summary = item.summary.strip()
+
+            # לשלוחה 5 - כותרת + תקציר
+            if folder == "5" and summary:
+                news_text = title + ". " + summary
+            else:
+                news_text = title
+
+            if news_text in seen:
                 continue
 
             if title in old_news:
@@ -170,9 +181,9 @@ for folder, category in categories.items():
                 if not any(keyword in title for keyword in category["keywords"]):
                     continue
 
-            seen.add(title)
+            seen.add(news_text)
             old_news.append(title)
-            items.append(title)
+            items.append(news_text)
             
     if not items:
         continue
@@ -248,11 +259,40 @@ for folder, category in categories.items():
         )
 
 
-    # העלאה לימות המשיח
+# העלאה לימות המשיח
 
-    token = os.environ["YEMOT_TOKEN"]
+token = os.environ["YEMOT_TOKEN"]
 
-    url = "https://www.call2all.co.il/ym/api/UploadFile"
+url = "https://www.call2all.co.il/ym/api/UploadFile"
+
+
+if folder == "5":
+
+    for index in range(len(items[:15])):
+
+        wav_name = f"news_{folder}_{index}.wav"
+
+        files = {
+            "file": open(wav_name, "rb")
+        }
+
+        data = {
+            "token": token,
+            "path": f"ivr2:/{folder}/",
+            "autoNumbering": "true",
+            "convertAudio": "1"
+        }
+
+        response = requests.post(
+            url,
+            files=files,
+            data=data
+        )
+
+        print(folder, index, response.text)
+
+
+else:
 
     files = {
         "file": open(f"news_{folder}.wav", "rb")
