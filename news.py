@@ -164,7 +164,8 @@ for folder, category in categories.items():
             title = re.sub(r'<.*?>', '', title)
             title = re.sub(r'[A-Za-z]+', '', title)
             title = " ".join(title.split())
-
+            title = re.sub(r'[.,;:"\'()\-%–—-]', '', title)
+            
             summary = ""
 
             if hasattr(item, "summary"):
@@ -178,11 +179,17 @@ for folder, category in categories.items():
 
             # הסרת סימנים מיותרים
             summary = re.sub(r'[<>/\[\]{}|*#@]', '', summary)
-
+            summary = re.sub(r'[.,;:"\'()\-%–—-]', '', summary)
+            
             # ניקוי רווחים כפולים
             summary = " ".join(summary.split())
 
-
+            # הסרת כותרת שחוזרת בתוך התקציר
+            if title in summary:
+                summary = summary.replace(title, "")
+                summary = " ".join(summary.split())
+                summary = summary.lstrip(" .,-–—:")
+        
             # לשלוחה 5 - כותרת + תקציר
             if folder == "5" and summary:
                 news_text = title + ". " + summary
@@ -286,9 +293,40 @@ url = "https://www.call2all.co.il/ym/api/UploadFile"
 
 if folder == "5":
 
-    for index in range(len(items[:15])):
+    # קבלת רשימת הקבצים הקיימים בשלוחה
+    list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
 
-        wav_name = f"news_{folder}_{index}.wav"
+    list_data = {
+        "token": token,
+        "path": f"ivr2:/{folder}/"
+    }
+
+    result = requests.post(
+        list_url,
+        data=list_data
+    ).json()
+
+    max_number = 0
+
+    if "files" in result:
+        for file in result["files"]:
+            name = file.get("name", "")
+
+            number = re.findall(r'\d+', name)
+
+            if number:
+                max_number = max(
+                    max_number,
+                    int(number[0])
+                )
+
+    # העלאה עם מספר חדש גבוה יותר
+    for index, wav_name in enumerate(
+        [f"news_{folder}_{i}.wav" for i in range(len(items[:15]))],
+        start=1
+    ):
+
+        new_number = max_number + index
 
         files = {
             "file": open(wav_name, "rb")
@@ -296,8 +334,7 @@ if folder == "5":
 
         data = {
             "token": token,
-            "path": f"ivr2:/{folder}/",
-            "autoNumbering": "true",
+            "path": f"ivr2:/{folder}/{new_number}.wav",
             "convertAudio": "1"
         }
 
@@ -307,7 +344,8 @@ if folder == "5":
             data=data
         )
 
-        print(folder, index, response.text)
+        print(folder, new_number, response.text)
+
 
 
 else:
