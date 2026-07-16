@@ -215,7 +215,7 @@ for folder, category in categories.items():
                 if len(summary) < 20:
                     continue
 
-               news_text = summary
+                news_text = summary
             
             else:
                 news_text = title
