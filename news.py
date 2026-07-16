@@ -207,8 +207,16 @@ for folder, category in categories.items():
                 
         
             # לשלוחה 1 - כותרת + תקציר
-            if folder == "1" and summary:
-                news_text = title + ". " + summary
+            if folder == "1":
+
+                if not summary:
+                    continue
+                    
+                if len(summary) < 20:
+                    continue
+
+               news_text = summary
+            
             else:
                 news_text = title
 
