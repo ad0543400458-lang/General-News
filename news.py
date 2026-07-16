@@ -5,10 +5,8 @@ from gtts import gTTS
 from pydub import AudioSegment
 import json
 import re
+from datetime import datetime, timezone
 
-# ===========================
-# מקורות RSS
-# ===========================
 
 # ===========================
 # קטגוריות ושלוחות
@@ -21,11 +19,11 @@ categories = {
             "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": [
-            "רמת שלמה",
-            "שכונת רמת שלמה"
+            "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+דירות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he"
         ]
     },
 
@@ -35,16 +33,13 @@ categories = {
             "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בית+שמש+חדשות&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=בית+שמש+נדלן&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש+תחבורה&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": [
-            "בית שמש",
-            "רמת בית שמש",
-            "עיריית בית שמש",
-            "נדלן בית שמש",
-            "בנייה בבית שמש",
-            "תחבורה בית שמש"
+            "https://news.google.com/rss/search?q=בית+שמש+בניה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בית+שמש+תחבורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בית+שמש+כבישים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he"
         ]
     },
 
@@ -53,87 +48,55 @@ categories = {
         "sources": [
             "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ארחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": [
-            "אורחות תורה",
-            "ארחות תורה",
-            "ישיבת אורחות תורה"
+            "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he"
         ]
     },
 
 
     "4": {
         "sources": [
-            "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+עירייה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+נדלן&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": [
-            "שיכון ד",
-            "טבריה",
-            "עיריית טבריה",
-            "נדלן טבריה"
+            "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=טבריה+חדשות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=טבריה+נדלן&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=טבריה+בניה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he"
         ]
     },
 
-        "1": {
+
+    "1": {
         "sources": [
-            # חדשות כלליות
+
             "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ישראל&hl=he&gl=IL&ceid=IL:he",
-            
-            # כלכלה וכסף
+
             "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=שוק+ההון&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
 
-            # תחבורה ותשתיות
             "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
 
-            # מזג אוויר
             "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
 
-            # טכנולוגיה
             "https://news.google.com/rss/search?q=טכנולוגיה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=בינה+מלאכותית&hl=he&gl=IL&ceid=IL:he",
 
-            # חדשות ערים
             "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=בני+ברק&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מודיעין+עילית&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=אלעד&hl=he&gl=IL&ceid=IL:he",
 
-            # בריאות ומדע
             "https://news.google.com/rss/search?q=בריאות&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מדע&hl=he&gl=IL&ceid=IL:he"
-        ],
-
-        "keywords": [
-            "ישראל",
-            "חדשות",
-            "כלכלה",
-            "כסף",
-            "מחירים",
-            "דירות",
-            "נדלן",
-            "בנייה",
-            "תחבורה",
-            "כבישים",
-            "רכבת",
-            "מזג",
-            "טכנולוגיה",
-            "ירושלים",
-            "בית שמש",
-            "בריאות",
-            "מדע"
         ]
     }
 
@@ -159,66 +122,78 @@ for folder, category in categories.items():
 
         for item in feed.entries[:20]:
 
+            if hasattr(item, "published_parsed"):
+
+                published = datetime(
+                    *item.published_parsed[:6],
+                    tzinfo=timezone.utc
+                )
+
+                age = datetime.now(timezone.utc) - published
+
+                if age.days > 2:
+                    continue
+
+
             title = item.title.strip()
 
             title = re.sub(r'<.*?>', '', title)
             title = re.sub(r'[A-Za-z]+', '', title)
             title = " ".join(title.split())
             title = re.sub(r'[.,;:"\'()\-%–—-]', '', title)
-            
+
+
             summary = ""
 
             if hasattr(item, "summary"):
                 summary = item.summary.strip()
 
-             
-  
-            
-            # ניקוי HTML וסימנים
+
             summary = re.sub(r'<.*?>', '', summary)
 
-            # הסרת מילים באנגלית
+
+            summary = re.sub(
+                r'(ynet|וואלה|מעריב|ישראל היום|כאן חדשות|חדשות 12|חדשות 13|N12)',
+                '',
+                summary,
+                flags=re.IGNORECASE
+            )
+
+
             summary = re.sub(r'[A-Za-z]+', '', summary)
 
-            # הסרת סימנים מיותרים
             summary = re.sub(r'[<>/\[\]{}|*#@]', '', summary)
             summary = re.sub(r'[.,;:"\'()\-%–—-]', '', summary)
             summary = re.sub(r'[^\u0590-\u05FF0-9., ]', ' ', summary)
-            title = re.sub(r'[^\u0590-\u05FF0-9 ]', ' ', title)
-            
-            # ניקוי רווחים כפולים
+
+
             summary = " ".join(summary.split())
 
-            # הסרת כותרת שחוזרת בתוך התקציר
+
             title_compare = re.sub(r'\s+', '', title)
-
-
             summary_compare = re.sub(r'\s+', '', summary)
 
             if summary_compare.startswith(title_compare):
-               summary = summary[len(title):].lstrip(" .,:-–—")
+                summary = summary[len(title):].lstrip(" .,:-–—")
 
 
             summary = " ".join(summary.split())
 
-             # ניקוי סימנים שנשארו בתחילת התקציר
             summary = summary.lstrip(" .,-–—:")
-               
-                
-        
-            # לשלוחה 1 - כותרת + תקציר
-            if folder == "1":
 
-                if not summary:
-                    continue
-                    
-                if len(summary) < 20:
-                    continue
 
-                news_text = summary
-            
-            else:
-                news_text = title
+            summary = summary[:350]
+
+
+            if not summary:
+                continue
+
+            if len(summary) < 20:
+                continue
+
+
+            news_text = summary
+
 
             if news_text in seen:
                 continue
@@ -226,13 +201,10 @@ for folder, category in categories.items():
             if title in old_news:
                 continue
 
-            if folder != "1":
-                if not any(keyword in title for keyword in category["keywords"]):
-                    continue
 
             seen.add(news_text)
             old_news.append(title)
-            items.append(news_text)
+            items.append(news_text)  
             
     if not items:
         continue
