@@ -239,7 +239,7 @@ for folder, category in categories.items():
     # שלוחות 1 ו-5 - כל עדכון קובץ נפרד
     # ===========================
 
-    if folder in ["1","5"]:
+    if folder in ["1", "2", "3", "4", "5"]:
 
         for index, news in enumerate(items[:15]):
 
@@ -307,7 +307,7 @@ for folder, category in categories.items():
     url = "https://www.call2all.co.il/ym/api/UploadFile"
 
 
-    if folder in ["1", "5"]:
+    if folder in ["1", "2", "3", "4", "5"]:
 
         list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
 
