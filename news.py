@@ -23,13 +23,11 @@ categories = {
             "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he",
-            # תוספת פידים מהירים לשלוחה זו
             "https://www.inn.co.il/rss/mivzakim",
             "https://www.kikar.co.il/rss/mivzakim",
             "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
-
     "2": {
         "sources": [
             "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
@@ -44,13 +42,11 @@ categories = {
             "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+בית+שמש+ג&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            # תוספת פידים מהירים לשלוחה זו
             "https://www.inn.co.il/rss/mivzakim",
             "https://www.kikar.co.il/rss/mivzakim",
             "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
-
     "3": {
         "sources": [
             "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
@@ -59,13 +55,11 @@ categories = {
             "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            # תוספת פידים מהירים לשלוחה זו
             "https://www.inn.co.il/rss/mivzakim",
             "https://www.kikar.co.il/rss/mivzakim",
             "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
-
     "4": {
         "sources": [
             "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
@@ -77,13 +71,11 @@ categories = {
             "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he",
-            # תוספת פידים מהירים לשלוחה זו
             "https://www.inn.co.il/rss/mivzakim",
             "https://www.kikar.co.il/rss/mivzakim",
             "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
-
     "1": {
         "sources": [
             "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
@@ -108,49 +100,38 @@ categories = {
             "https://news.google.com/rss/search?q=תשתיות+ישראל&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
-            
             "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
             "https://rss.walla.co.il/feed/22", 
-            
             "https://news.google.com/rss/search?q=עמית+סגל+ציוץ&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מיכאל+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=יעקב+ברדוגו&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=דיווח+ראשוני&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מבזק+חם&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=פרסום+ראשון&hl=he&gl=IL&ceid=IL:he",
-            
             "https://news.google.com/rss/search?q=ציוץ+או+סטטוס+או+קבוצה+או+דיווח&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he",
-
-                   # === פידי מבזקים ישירים מאתרים ===
-           "https://www.inn.co.il/rss/mivzakim",      # מבזקי ערוץ 7
-           "https://www.kikar.co.il/rss/mivzakim",   # מבזקי כיכר השבת
-           "https://www.bhol.co.il/rss/mivzakim",     # מבזקי בחדרי חרדים
-           "https://www.ice.co.il/rss.xml",           # חדשות ועדכוני אייס
-           "https://www.bizportal.co.il/rss/bizportalrss.xml", # עדכוני שוק והון ביזפורטל
-
-           # === פידי חיפוש ממוקדים בגוגל ניוז (מבזקים ודיווחים מהירים) ===
-           "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=דיווח+ראשוני+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=ציוצים+עיתונאים+או+כתבים&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=אטילה+שומפלבי+או+יקיר+מויאל&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=חדשות+רוטר+או+חמאל&hl=he&gl=IL&ceid=IL:he",
-
-           # === פידי חיפוש נושאיים בגוגל ניוז (כלכלה, תשתיות ופיתוח) ===
-           "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=משרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
-
-           # === פידי חיפוש מקומיים וקהילתיים בגוגל ניוז ===
-           "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
-           "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he"
+            "https://www.inn.co.il/rss/mivzakim",      
+            "https://www.kikar.co.il/rss/mivzakim",   
+            "https://www.bhol.co.il/rss/mivzakim",     
+            "https://www.ice.co.il/rss.xml",           
+            "https://www.bizportal.co.il/rss/bizportalrss.xml", 
+            "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=דיווח+ראשוני+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=ציוצים+עיתונאים+או+כתבים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=אטילה+שומפלבי+או+יקיר+מויאל&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=חדשות+רוטר+או+חמאל&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=mשרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he"
         ]
     }
 }
@@ -161,9 +142,10 @@ try:
 except:
     old_news = []
 
-SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
+# הפיכת הרשימה ל-Set לצורך חיפוש מהיר משמעותית
+old_news_set = set(old_news)
 
-# הגדרת זמן ישראל הנוכחי באופן מדויק
+SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
 now_il = datetime.now(timezone.utc) + timedelta(hours=3)
 
 for folder, category in categories.items():
@@ -180,22 +162,27 @@ for folder, category in categories.items():
             else:
                 israel_time = now_il
 
-            # חישוב ההפרש בין זמן ישראל הנוכחי לזמן ישראל של הכתבה
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # סינון: אם הכתבה ישנה מ-8 שעות, או שהיא "עתידית" באופן חריג (מעל 10 דקות קדימה מהשעה עכשיו)
             if age_seconds > 4 * 3600 or age_seconds < -600:
                 continue
 
-            # תיקון קל למקרה של סטייה קטנה קדימה בזמן של אתר המקור
             if israel_time > now_il:
                 israel_time = now_il
 
             display_hour = israel_time.hour % 12
             if display_hour == 0:
                 display_hour = 12
-            str_time = f"{display_hour} {israel_time.minute}"
+
+            # --- עדכון 1: בניית השעה בצורה מדוברת ותקינה ל-TTS ---
+            if israel_time.minute == 0:
+                str_time = f"{display_hour}"
+            elif israel_time.minute == 1:
+                str_time = f"{display_hour} ודקה"
+            else:
+                str_time = f"{display_hour} ו {israel_time.minute} דקות"
+
             original_title = item.title.strip()
 
             title = re.sub(r'<.*?>', '', original_title)
@@ -239,7 +226,10 @@ for folder, category in categories.items():
             summary = " ".join(summary.split())
             summary = summary.lstrip(" .,-–—:?")
             
-            if not is_short_source:
+            # --- עדכון 2: אם המקור או הכותרת מכילים "מזג אוויר" או "תחזית", לא נחתוך ל-450 תווים ---
+            is_weather = "מזג אוויר" in source or "תחזית" in source or "מזג אוויר" in title or "תחזית" in title
+            
+            if not is_short_source and not is_weather:
                 summary = summary[:450]
 
             if not summary or len(summary) < 20:
@@ -260,12 +250,14 @@ for folder, category in categories.items():
 
             if news_content in seen:
                 continue
-            if title in old_news or normalized_compare in old_news:
+            if title in old_news_set or normalized_compare in old_news_set:
                 continue
 
             seen.add(news_content)
             old_news.append(title)
             old_news.append(normalized_compare)
+            old_news_set.add(title)
+            old_news_set.add(normalized_compare)
             
             raw_items.append({
                 "time_obj": israel_time,
@@ -340,25 +332,40 @@ for folder, category in categories.items():
             start=1
         ):
             new_number = str(max_number + index).zfill(3)
-            files = {"file": open(wav_name, "rb")}
+            
+            # שימוש בבלוק with כדי לסגור את הקובץ בצורה בטוחה מיד לאחר השליחה
+            with open(wav_name, "rb") as f:
+                files = {"file": f}
+                data = {
+                    "token": token,
+                    "path": f"ivr2:/{folder}/{new_number}.wav",
+                    "convertAudio": "1"
+                }
+                response = requests.post(url, files=files, data=data)
+                print(folder, new_number, response.text)
+
+            # ניקוי קבצים מקומיים כדי לא להעמיס על הדיסק
+            mp3_name = wav_name.replace(".wav", ".mp3")
+            if os.path.exists(wav_name): os.remove(wav_name)
+            if os.path.exists(mp3_name): os.remove(mp3_name)
+
+    else:
+        wav_path = f"news_{folder}.wav"
+        mp3_path = f"news_{folder}.mp3"
+        
+        with open(wav_path, "rb") as f:
+            files = {"file": f}
             data = {
                 "token": token,
-                "path": f"ivr2:/{folder}/{new_number}.wav",
+                "path": f"ivr2:/{folder}/",
+                "autoNumbering": "true",
                 "convertAudio": "1"
             }
             response = requests.post(url, files=files, data=data)
-            print(folder, new_number, response.text)
-
-    else:
-        files = {"file": open(f"news_{folder}.wav", "rb")}
-        data = {
-            "token": token,
-            "path": f"ivr2:/{folder}/",
-            "autoNumbering": "true",
-            "convertAudio": "1"
-        }
-        response = requests.post(url, files=files, data=data)
-        print(folder, response.text)
+            print(folder, response.text)
+            
+        if os.path.exists(wav_path): os.remove(wav_path)
+        if os.path.exists(mp3_path): os.remove(mp3_path)
 
 with open("seen_news.json", "w", encoding="utf-8") as f:
     json.dump(
