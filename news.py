@@ -22,7 +22,11 @@ categories = {
             "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he"
+            "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he",
+            # תוספת פידים מהירים לשלוחה זו
+            "https://www.inn.co.il/rss/mivzakim",
+            "https://www.kikar.co.il/rss/mivzakim",
+            "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
 
@@ -39,7 +43,11 @@ categories = {
             "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+בית+שמש+ג&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he"
+            "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+            # תוספת פידים מהירים לשלוחה זו
+            "https://www.inn.co.il/rss/mivzakim",
+            "https://www.kikar.co.il/rss/mivzakim",
+            "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
 
@@ -50,7 +58,11 @@ categories = {
             "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he"
+            "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+            # תוספת פידים מהירים לשלוחה זו
+            "https://www.inn.co.il/rss/mivzakim",
+            "https://www.kikar.co.il/rss/mivzakim",
+            "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
 
@@ -64,7 +76,11 @@ categories = {
             "https://news.google.com/rss/search?q=טבריה+בניה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he"
+            "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he",
+            # תוספת פידים מהירים לשלוחה זו
+            "https://www.inn.co.il/rss/mivzakim",
+            "https://www.kikar.co.il/rss/mivzakim",
+            "https://www.bhol.co.il/rss/mivzakim"
         ]
     },
 
@@ -157,7 +173,7 @@ for folder, category in categories.items():
     for source in category["sources"]:
         feed = feedparser.parse(source)
 
-        for item in feed.entries[:40]:
+        for item in feed.entries[:15]:
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 israel_time = published + timedelta(hours=3)
