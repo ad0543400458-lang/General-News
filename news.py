@@ -8,7 +8,7 @@ import re
 from datetime import datetime, timezone
 
 # ===========================
-# קטגוריות ושלוחות מורחבות (מתעדכן כל כמה דקות)
+# קטגוריות ושלוחות מורחבות
 # ===========================
 
 categories = {
@@ -120,9 +120,11 @@ for folder, category in categories.items():
                 if age.days > 2:
                     continue
 
-            # ניקוי וסינון כותרת הכתבה
-            title = item.title.strip()
-            title = re.sub(r'<.*?>', '', title)
+            # שמירה על כותרת מקורית נקייה לצורך זיהוי סימני שאלה
+            original_title = item.title.strip()
+
+            # ניקוי וסינון כותרת הכתבה (ללא סימני שאלה בשלב זה)
+            title = re.sub(r'<.*?>', '', original_title)
             title = re.sub(r'[A-Za-z]+', '', title)
             title = " ".join(title.split())
             title = re.sub(r'[.,;:"\'()\-%–—-]', '', title)
@@ -144,27 +146,35 @@ for folder, category in categories.items():
             summary = re.sub(r'[A-Za-z]+', '', summary)
             summary = re.sub(r'[<>/\[\]{}|*#@]', '', summary)
             summary = re.sub(r'[.,;:"\'()\-%–—-]', '', summary)
-            summary = re.sub(r'[^\u0590-\u05FF0-9., ]', ' ', summary)
+            summary = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', summary) # הוספת תמיכה בסימן שאלה
             summary = " ".join(summary.split())
 
             title_compare = re.sub(r'\s+', '', title)
             summary_compare = re.sub(r'\s+', '', summary)
 
             if summary_compare.startswith(title_compare):
-                summary = summary[len(title):].lstrip(" .,:-–—")
+                summary = summary[len(title):].lstrip(" .,:-–—?")
 
             summary = " ".join(summary.split())
-            summary = summary.lstrip(" .,-–—:")
-            summary = summary[:350]
+            summary = summary.lstrip(" .,-–—:?")
+            summary = summary[:450] # הגדלת הטווח מעט כדי לאפשר את תוכן הכתבה המלא
 
             if not summary or len(summary) < 20:
                 continue
 
             # --- שיפור: הסרת המילה "חדשות" מתוכן ההקראה ---
             summary = re.sub(r'\bחדשות\b', '', summary).strip()
-            summary = " ".join(summary.split())  # ניקוי רווחים כפולים שנוצרו מהמחיקה
+            summary = " ".join(summary.split())
 
-            news_text = summary
+            # --- מנגנון חכם למניעת כותרת קטועה (אופציה 2) ---
+            # אם הכותרת המקורית מסתיימת בסימן שאלה, נחבר את השאלה יחד עם פירוט הכתבה
+            if original_title.strip().endswith('?'):
+                clean_title_q = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', original_title).strip()
+                news_text = f"{clean_title_q} {summary}"
+            else:
+                news_text = summary
+
+            news_text = " ".join(news_text.split())
 
             # מפתח ייחודי למניעת כפילויות של דיווחים זהים באתרי RSS שונים
             normalized_compare = re.sub(r'\s+', '', news_text)
@@ -176,7 +186,7 @@ for folder, category in categories.items():
 
             seen.add(news_text)
             old_news.append(title)
-            old_news.append(normalized_compare)  # שמירת המזהה הייחודי למניעת חזרות בעתיד
+            old_news.append(normalized_compare)
             items.append(news_text)  
 
     if not items:
@@ -269,7 +279,7 @@ for folder, category in categories.items():
 # שמירת רשימת הכתבות העדכנית למניעת חזרות בריצות הבאות
 with open("seen_news.json", "w", encoding="utf-8") as f:
     json.dump(
-        old_news[-500:],  # הגדלת הזיכרון ל-500 פריטים כדי להכיל את כמות המקורות החדשה
+        old_news[-600:], # הגדלה קלה לטובת המזהים החדשים
         f,
         ensure_ascii=False,
         indent=2
