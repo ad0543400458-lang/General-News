@@ -136,7 +136,7 @@ for folder, category in categories.items():
                     tzinfo=timezone.utc
                 )
                 age = datetime.now(timezone.utc) - published
-                if age.days > 2:
+                if age.days > 1:
                     continue
 
             # שמירה על כותרת מקורית
