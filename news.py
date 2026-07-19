@@ -93,11 +93,9 @@ categories = {
             "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
             
-            # פידים ישירים של מבזקים (RSS ישיר מאתרים) - נחשבים מקורות קצרים
             "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
             "https://rss.walla.co.il/feed/22", 
             
-            # עיתונאים, כתבים בכירים ודיווחים ראשוניים
             "https://news.google.com/rss/search?q=עמית+סגל+ציוץ&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מיכאל+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=יעקב+ברדוגו&hl=he&gl=IL&ceid=IL:he",
@@ -105,7 +103,6 @@ categories = {
             "https://news.google.com/rss/search?q=מבזק+חם&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=פרסום+ראשון&hl=he&gl=IL&ceid=IL:he",
             
-            # פידים משולבים
             "https://news.google.com/rss/search?q=ציוץ+או+סטטוס+או+קבוצה+או+דיווח&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
@@ -114,68 +111,53 @@ categories = {
     }
 }
 
-# טעינת כתבות ותכנים שכבר הוקראו בעבר
 try:
     with open("seen_news.json", "r", encoding="utf-8") as f:
         old_news = json.load(f)
 except:
     old_news = []
 
-# רשימת כתובות ייחודיות המצביעות על מקורות קצרים (מבזקים ישירים)
 SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
 
 for folder, category in categories.items():
-    items = []
+    raw_items = []
     seen = set()
 
     for source in category["sources"]:
         feed = feedparser.parse(source)
 
         for item in feed.entries[:40]:
-            # חילוץ זמן והמרה לשעון ישראל (UTC+3)
-            str_time = ""
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 age = datetime.now(timezone.utc) - published
                 if age.days > 1:
                     continue
-                # המרה לשעון ישראל
                 israel_time = published + timedelta(hours=3)
-                str_time = israel_time.strftime("%H:%M")
             else:
-                # גיבוי במקרה שאין זמן מוגדר בפיד
                 israel_time = datetime.now(timezone.utc) + timedelta(hours=3)
-                str_time = israel_time.strftime("%H:%M")
 
-            # שמירה על כותרת מקורית
+            str_time = israel_time.strftime("%H:%M")
             original_title = item.title.strip()
 
-            # ניקוי וסינון כותרת הכתבה
             title = re.sub(r'<.*?>', '', original_title)
             title = re.sub(r'[A-Za-z]+', '', title)
             title = " ".join(title.split())
             title = re.sub(r'[.,;:"\'()\-%–—-]', '', title)
 
-            # זיהוי סוג המקור (קצר או ארוך)
             link = getattr(item, "link", "")
             is_short_source = any(domain in link for domain in SHORT_DOMAINS)
 
-            # חילוץ התוכן בהתאם לסוג המקור
             summary = ""
             if is_short_source:
-                # מקור קצר: מנסה לקחת תוכן מלא, ואם אין אז תקציר
                 if hasattr(item, "content"):
                     summary = item.content[0].value.strip()
                 elif hasattr(item, "summary"):
                     summary = item.summary.strip()
             else:
-                # מקור ארוך: תקציר בלבד
                 if hasattr(item, "summary"):
                     summary = item.summary.strip()
 
             summary = re.sub(r'<.*?>', '', summary)
-
-            # הסרת שמות אתרי מדיה נפוצים
             summary = re.sub(
                 r'(ynet|וואלה|מעריב|ישראל היום|כאן חדשות|חדשות 12|חדשות 13|N12)',
                 '',
@@ -198,18 +180,15 @@ for folder, category in categories.items():
             summary = " ".join(summary.split())
             summary = summary.lstrip(" .,-–—:?")
             
-            # במקור ארוך מגבילים את האורך, במקור קצר נותנים לו לרוץ יותר
             if not is_short_source:
                 summary = summary[:450]
 
             if not summary or len(summary) < 20:
                 continue
 
-            # הסרת המילה "חדשות" מתוכן ההקראה
             summary = re.sub(r'\bחדשות\b', '', summary).strip()
             summary = " ".join(summary.split())
 
-            # מנגנון למניעת כותרת קטועה
             if original_title.strip().endswith('?'):
                 clean_title_q = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', original_title).strip()
                 news_content = f"{clean_title_q} {summary}"
@@ -217,11 +196,7 @@ for folder, category in categories.items():
                 news_content = summary
 
             news_content = " ".join(news_content.split())
-
-            # הוספת שעת הפרסום בתחילת הכתבה (עם נקודה להפסקה קלה)
             news_text = f"{str_time}. {news_content}"
-
-            # מפתח ייחודי למניעת כפילויות (לפי המלל עצמו)
             normalized_compare = re.sub(r'\s+', '', news_content)
 
             if news_content in seen:
@@ -232,12 +207,21 @@ for folder, category in categories.items():
             seen.add(news_content)
             old_news.append(title)
             old_news.append(normalized_compare)
-            items.append(news_text)  
+            
+            # שומרים זמנית את הפריט יחד עם אובייקט הזמן שלו בשביל המיון
+            raw_items.append({
+                "time_obj": israel_time,
+                "text": news_text
+            })
 
-    if not items:
+    if not raw_items:
         continue
 
-    # הגבלת ה-15 הוסרה לחלוטין כאן!
+    # ==================================================
+    # מיון הכתבות לפי הזמן (מהישן ביותר לחדיש ביותר)
+    # ==================================================
+    raw_items.sort(key=lambda x: x["time_obj"])
+    items = [item["text"] for item in raw_items]
 
     # ===========================
     # יצירת הטקסט להקראה והמרה ל-WAV
@@ -321,7 +305,6 @@ for folder, category in categories.items():
         response = requests.post(url, files=files, data=data)
         print(folder, response.text)
 
-# שמירת רשימת הכתבות העדכנית למניעת חזרות בריצות הבאות
 with open("seen_news.json", "w", encoding="utf-8") as f:
     json.dump(
         old_news[-3000:], 
