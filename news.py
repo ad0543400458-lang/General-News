@@ -130,8 +130,11 @@ for folder, category in categories.items():
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 age = datetime.now(timezone.utc) - published
-                if age.days > 1:
+                
+                # תנאי מעודכן: אם עברו יותר מ-8 שעות (או יותר מ-0 ימים ויש שעות עודפות), נדלג
+                if age.total_seconds() > 8 * 3600:
                     continue
+                    
                 israel_time = published + timedelta(hours=3)
             else:
                 israel_time = datetime.now(timezone.utc) + timedelta(hours=3)
@@ -208,7 +211,6 @@ for folder, category in categories.items():
             old_news.append(title)
             old_news.append(normalized_compare)
             
-            # שומרים זמנית את הפריט יחד עם אובייקט הזמן שלו בשביל המיון
             raw_items.append({
                 "time_obj": israel_time,
                 "text": news_text
@@ -217,9 +219,6 @@ for folder, category in categories.items():
     if not raw_items:
         continue
 
-    # ==================================================
-    # מיון הכתבות לפי הזמן (מהישן ביותר לחדיש ביותר)
-    # ==================================================
     raw_items.sort(key=lambda x: x["time_obj"])
     items = [item["text"] for item in raw_items]
 
