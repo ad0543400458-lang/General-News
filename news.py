@@ -176,7 +176,10 @@ for folder, category in categories.items():
             if israel_time > now_il:
                 israel_time = now_il
 
-            str_time = israel_time.strftime("%H:%M")
+            display_hour = israel_time.hour % 12
+            if display_hour == 0:
+                display_hour = 12
+            str_time = f"{display_hour} {israel_time.minute}"
             original_title = item.title.strip()
 
             title = re.sub(r'<.*?>', '', original_title)
