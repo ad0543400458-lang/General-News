@@ -3,7 +3,7 @@ name: יצירת חדשות
 on:
   workflow_dispatch:
   schedule:
-   - cron: "*/15 * * * *"
+   - cron: "0,15,30,45 * * * *"
 
 jobs:
   news:
