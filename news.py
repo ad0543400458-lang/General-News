@@ -106,7 +106,35 @@ categories = {
             "https://news.google.com/rss/search?q=ציוץ+או+סטטוס+או+קבוצה+או+דיווח&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he"
+            "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he",
+
+                   # === פידי מבזקים ישירים מאתרים ===
+           "https://www.inn.co.il/rss/mivzakim",      # מבזקי ערוץ 7
+           "https://www.kikar.co.il/rss/mivzakim",   # מבזקי כיכר השבת
+           "https://www.bhol.co.il/rss/mivzakim",     # מבזקי בחדרי חרדים
+           "https://www.ice.co.il/rss.xml",           # חדשות ועדכוני אייס
+           "https://www.bizportal.co.il/rss/bizportalrss.xml", # עדכוני שוק והון ביזפורטל
+
+           # === פידי חיפוש ממוקדים בגוגל ניוז (מבזקים ודיווחים מהירים) ===
+           "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=דיווח+ראשוני+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=ציוצים+עיתונאים+או+כתבים&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=אטילה+שומפלבי+או+יקיר+מויאל&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=חדשות+רוטר+או+חמאל&hl=he&gl=IL&ceid=IL:he",
+
+           # === פידי חיפוש נושאיים בגוגל ניוז (כלכלה, תשתיות ופיתוח) ===
+           "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=משרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
+
+           # === פידי חיפוש מקומיים וקהילתיים בגוגל ניוז ===
+           "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
+           "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he"
         ]
     }
 }
