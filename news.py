@@ -5,10 +5,10 @@ from gtts import gTTS
 from pydub import AudioSegment
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 # ===========================
-# קטגוריות ומקורות מלאים ומשולבים (ללא שום השמטה)
+# קטגוריות ומקורות מלאים ומשולבים
 # ===========================
 
 categories = {
@@ -70,7 +70,6 @@ categories = {
 
     "1": {
         "sources": [
-            # כל המקורות המקוריים של שלוחה 1
             "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ישראל&hl=he&gl=IL&ceid=IL:he",
@@ -94,7 +93,7 @@ categories = {
             "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
             
-            # פידים ישירים של מבזקים (RSS ישיר מאתרים)
+            # פידים ישירים של מבזקים (RSS ישיר מאתרים) - נחשבים מקורות קצרים
             "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
             "https://rss.walla.co.il/feed/22", 
             
@@ -106,7 +105,7 @@ categories = {
             "https://news.google.com/rss/search?q=מבזק+חם&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=פרסום+ראשון&hl=he&gl=IL&ceid=IL:he",
             
-            # פידים משולבים המקשרים למאות קבוצות, רשתות ועדכוני רשת נוספים
+            # פידים משולבים
             "https://news.google.com/rss/search?q=ציוץ+או+סטטוס+או+קבוצה+או+דיווח&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
@@ -122,6 +121,9 @@ try:
 except:
     old_news = []
 
+# רשימת כתובות ייחודיות המצביעות על מקורות קצרים (מבזקים ישירים)
+SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
+
 for folder, category in categories.items():
     items = []
     seen = set()
@@ -129,15 +131,21 @@ for folder, category in categories.items():
     for source in category["sources"]:
         feed = feedparser.parse(source)
 
-        for item in feed.entries[:40]: # סריקה רחבה כדי לקלוט את נפח העדכונים הגדול מהרשתות
-            if hasattr(item, "published_parsed"):
-                published = datetime(
-                    *item.published_parsed[:6],
-                    tzinfo=timezone.utc
-                )
+        for item in feed.entries[:40]:
+            # חילוץ זמן והמרה לשעון ישראל (UTC+3)
+            str_time = ""
+            if hasattr(item, "published_parsed") and item.published_parsed:
+                published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 age = datetime.now(timezone.utc) - published
                 if age.days > 1:
                     continue
+                # המרה לשעון ישראל
+                israel_time = published + timedelta(hours=3)
+                str_time = israel_time.strftime("%H:%M")
+            else:
+                # גיבוי במקרה שאין זמן מוגדר בפיד
+                israel_time = datetime.now(timezone.utc) + timedelta(hours=3)
+                str_time = israel_time.strftime("%H:%M")
 
             # שמירה על כותרת מקורית
             original_title = item.title.strip()
@@ -148,9 +156,22 @@ for folder, category in categories.items():
             title = " ".join(title.split())
             title = re.sub(r'[.,;:"\'()\-%–—-]', '', title)
 
+            # זיהוי סוג המקור (קצר או ארוך)
+            link = getattr(item, "link", "")
+            is_short_source = any(domain in link for domain in SHORT_DOMAINS)
+
+            # חילוץ התוכן בהתאם לסוג המקור
             summary = ""
-            if hasattr(item, "summary"):
-                summary = item.summary.strip()
+            if is_short_source:
+                # מקור קצר: מנסה לקחת תוכן מלא, ואם אין אז תקציר
+                if hasattr(item, "content"):
+                    summary = item.content[0].value.strip()
+                elif hasattr(item, "summary"):
+                    summary = item.summary.strip()
+            else:
+                # מקור ארוך: תקציר בלבד
+                if hasattr(item, "summary"):
+                    summary = item.summary.strip()
 
             summary = re.sub(r'<.*?>', '', summary)
 
@@ -176,33 +197,39 @@ for folder, category in categories.items():
 
             summary = " ".join(summary.split())
             summary = summary.lstrip(" .,-–—:?")
-            summary = summary[:450]
+            
+            # במקור ארוך מגבילים את האורך, במקור קצר נותנים לו לרוץ יותר
+            if not is_short_source:
+                summary = summary[:450]
 
             if not summary or len(summary) < 20:
                 continue
 
-            # --- הסרת המילה "חדשות" מתוכן ההקראה ---
+            # הסרת המילה "חדשות" מתוכן ההקראה
             summary = re.sub(r'\bחדשות\b', '', summary).strip()
             summary = " ".join(summary.split())
 
-            # --- מנגנון חכם למניעת כותרת קטועה (אופציה 2) ---
+            # מנגנון למניעת כותרת קטועה
             if original_title.strip().endswith('?'):
                 clean_title_q = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', original_title).strip()
-                news_text = f"{clean_title_q} {summary}"
+                news_content = f"{clean_title_q} {summary}"
             else:
-                news_text = summary
+                news_content = summary
 
-            news_text = " ".join(news_text.split())
+            news_content = " ".join(news_content.split())
 
-            # מפתח ייחודי למניעת כפילויות
-            normalized_compare = re.sub(r'\s+', '', news_text)
+            # הוספת שעת הפרסום בתחילת הכתבה (עם נקודה להפסקה קלה)
+            news_text = f"{str_time}. {news_content}"
 
-            if news_text in seen:
+            # מפתח ייחודי למניעת כפילויות (לפי המלל עצמו)
+            normalized_compare = re.sub(r'\s+', '', news_content)
+
+            if news_content in seen:
                 continue
             if title in old_news or normalized_compare in old_news:
                 continue
 
-            seen.add(news_text)
+            seen.add(news_content)
             old_news.append(title)
             old_news.append(normalized_compare)
             items.append(news_text)  
@@ -210,13 +237,13 @@ for folder, category in categories.items():
     if not items:
         continue
 
-    items = items[:15]
+    # הגבלת ה-15 הוסרה לחלוטין כאן!
 
     # ===========================
     # יצירת הטקסט להקראה והמרה ל-WAV
     # ===========================
     if folder in ["1", "2", "3", "4", "5"]:
-        for index, news in enumerate(items[:15]):
+        for index, news in enumerate(items):
             tts = gTTS(news.strip(), lang="iw")
 
             mp3_name = f"news_{folder}_{index}.mp3"
@@ -232,9 +259,9 @@ for folder, category in categories.items():
 
     else:
         text = ""
-        for i, news in enumerate(items[:15]):
+        for i, news in enumerate(items):
             text += news.strip()
-            if i != len(items[:15]) - 1:
+            if i != len(items) - 1:
                 text += "\n\nעדכון נוסף.\n\n"
 
         tts = gTTS(text, lang="iw")
@@ -270,7 +297,7 @@ for folder, category in categories.items():
                     max_number = max(max_number, int(number[0]))
 
         for index, wav_name in enumerate(
-            [f"news_{folder}_{i}.wav" for i in range(len(items[:15]))],
+            [f"news_{folder}_{i}.wav" for i in range(len(items))],
             start=1
         ):
             new_number = str(max_number + index).zfill(3)
@@ -297,7 +324,7 @@ for folder, category in categories.items():
 # שמירת רשימת הכתבות העדכנית למניעת חזרות בריצות הבאות
 with open("seen_news.json", "w", encoding="utf-8") as f:
     json.dump(
-        old_news[-3000:], # הגדלה ל-3000 פריטים כדי להכיל בבטחה את כל המקורות הישנים והחדשים יחד
+        old_news[-3000:], 
         f,
         ensure_ascii=False,
         indent=2
