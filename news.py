@@ -173,7 +173,7 @@ for folder, category in categories.items():
     for source in category["sources"]:
         feed = feedparser.parse(source)
 
-        for item in feed.entries[:15]:
+        for item in feed.entries[:40]:
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 israel_time = published + timedelta(hours=3)
@@ -185,7 +185,7 @@ for folder, category in categories.items():
             age_seconds = age_delta.total_seconds()
 
             # סינון: אם הכתבה ישנה מ-8 שעות, או שהיא "עתידית" באופן חריג (מעל 10 דקות קדימה מהשעה עכשיו)
-            if age_seconds > 8 * 3600 or age_seconds < -600:
+            if age_seconds > 4 * 3600 or age_seconds < -600:
                 continue
 
             # תיקון קל למקרה של סטייה קטנה קדימה בזמן של אתר המקור
