@@ -119,6 +119,9 @@ except:
 
 SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
 
+# הגדרת זמן ישראל הנוכחי באופן מדויק
+now_il = datetime.now(timezone.utc) + timedelta(hours=3)
+
 for folder, category in categories.items():
     raw_items = []
     seen = set()
@@ -129,15 +132,21 @@ for folder, category in categories.items():
         for item in feed.entries[:40]:
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
-                age = datetime.now(timezone.utc) - published
-                
-                # תנאי מעודכן: אם עברו יותר מ-8 שעות (או יותר מ-0 ימים ויש שעות עודפות), נדלג
-                if age.total_seconds() > 8 * 3600:
-                    continue
-                    
                 israel_time = published + timedelta(hours=3)
             else:
-                israel_time = datetime.now(timezone.utc) + timedelta(hours=3)
+                israel_time = now_il
+
+            # חישוב ההפרש בין זמן ישראל הנוכחי לזמן ישראל של הכתבה
+            age_delta = now_il - israel_time
+            age_seconds = age_delta.total_seconds()
+
+            # סינון: אם הכתבה ישנה מ-8 שעות, או שהיא "עתידית" באופן חריג (מעל 10 דקות קדימה מהשעה עכשיו)
+            if age_seconds > 8 * 3600 or age_seconds < -600:
+                continue
+
+            # תיקון קל למקרה של סטייה קטנה קדימה בזמן של אתר המקור
+            if israel_time > now_il:
+                israel_time = now_il
 
             str_time = israel_time.strftime("%H:%M")
             original_title = item.title.strip()
