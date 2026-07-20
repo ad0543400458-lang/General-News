@@ -8,12 +8,72 @@ import re
 from datetime import datetime, timezone, timedelta
 
 # ===========================
+# מקורות משותפים (שלוחה 1)
+# ===========================
+sources_1 = [
+    "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טכנולוגיה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בינה+מלאכותית&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בני+ברק&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בריאות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מדע&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=פיתוח+עירוני&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=תשתיות+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
+    "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
+    "https://rss.walla.co.il/feed/22", 
+    "https://news.google.com/rss/search?q=עמית+סגל+ציוץ&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מיכאל+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=יעקב+ברדוגו&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=דיווח+ראשוני&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מבזק+חם&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=פרסום+ראשון&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ציוץ+או+סטטוס+או+קבוצה+או+דיווח&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he",
+    "https://www.inn.co.il/rss/mivzakim",      
+    "https://www.kikar.co.il/rss/mivzakim",   
+    "https://www.bhol.co.il/rss/mivzakim",     
+    "https://www.ice.co.il/rss.xml",           
+    "https://www.bizportal.co.il/rss/bizportalrss.xml", 
+    "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=דיווח+ראשוני+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ציוצים+עיתונאים+או+כתבים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=אטילה+שומפלבי+או+יקיר+מויאל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=חדשות+רוטר+או+חמאל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=mשרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he"
+]
+
+# ===========================
 # קטגוריות ומקורות מלאים ומשולבים
 # ===========================
 
 categories = {
     "5": {
-        "sources": [
+        "sources": sources_1 + [
             "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
@@ -29,7 +89,7 @@ categories = {
         ]
     },
     "2": {
-        "sources": [
+        "sources": sources_1 + [
             "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
@@ -48,7 +108,7 @@ categories = {
         ]
     },
     "3": {
-        "sources": [
+        "sources": sources_1 + [
             "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ארחות+תורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
@@ -61,7 +121,7 @@ categories = {
         ]
     },
     "4": {
-        "sources": [
+        "sources": sources_1 + [
             "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
@@ -77,62 +137,7 @@ categories = {
         ]
     },
     "1": {
-        "sources": [
-            "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ישראל&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טכנולוגיה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בינה+מלאכותית&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בני+ברק&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בריאות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מדע&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פיתוח+עירוני&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=תשתיות+ישראל&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
-            "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
-            "https://rss.walla.co.il/feed/22", 
-            "https://news.google.com/rss/search?q=עמית+סגל+ציוץ&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מיכאל+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=יעקב+ברדוגו&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=דיווח+ראשוני&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מבזק+חם&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פרסום+ראשון&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ציוץ+או+סטטוס+או+קבוצה+או+דיווח&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he",
-            "https://www.inn.co.il/rss/mivzakim",      
-            "https://www.kikar.co.il/rss/mivzakim",   
-            "https://www.bhol.co.il/rss/mivzakim",     
-            "https://www.ice.co.il/rss.xml",           
-            "https://www.bizportal.co.il/rss/bizportalrss.xml", 
-            "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=דיווח+ראשוני+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ציוצים+עיתונאים+או+כתבים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=אטילה+שומפלבי+או+יקיר+מויאל&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=חדשות+רוטר+או+חמאל&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=mשרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he"
-        ]
+        "sources": sources_1
     }
 }
 
