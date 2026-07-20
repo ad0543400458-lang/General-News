@@ -45,9 +45,6 @@ sources_1 = [
     "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he",
-    "https://www.inn.co.il/rss/mivzakim",      
-    "https://www.kikar.co.il/rss/mivzakim",   
-    "https://www.bhol.co.il/rss/mivzakim",     
     "https://www.ice.co.il/rss.xml",           
     "https://www.bizportal.co.il/rss/bizportalrss.xml", 
     "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
@@ -58,7 +55,7 @@ sources_1 = [
     "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=mשרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=משרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
@@ -68,25 +65,13 @@ sources_1 = [
 ]
 
 # ===========================
-# קטגוריות ומקורות מלאים ומשולבים
+# הגדרת קטגוריות, מקורות ומילות מפתח לסינון
 # ===========================
 
 categories = {
-    "5": {
-        "sources": sources_1 + [
-            "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+דירות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he",
-            "https://www.inn.co.il/rss/mivzakim",
-            "https://www.kikar.co.il/rss/mivzakim",
-            "https://www.bhol.co.il/rss/mivzakim"
-        ]
+    "1": {
+        "sources": sources_1,
+        "keywords": []  # שלוחה 1 מקבלת את הכל ללא סינון
     },
     "2": {
         "sources": sources_1 + [
@@ -101,11 +86,9 @@ categories = {
             "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=רמת+בית+שמש+ג&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://www.inn.co.il/rss/mivzakim",
-            "https://www.kikar.co.il/rss/mivzakim",
-            "https://www.bhol.co.il/rss/mivzakim"
-        ]
+            "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he"
+        ],
+        "keywords": ["בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג"]
     },
     "3": {
         "sources": sources_1 + [
@@ -114,11 +97,9 @@ categories = {
             "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://www.inn.co.il/rss/mivzakim",
-            "https://www.kikar.co.il/rss/mivzakim",
-            "https://www.bhol.co.il/rss/mivzakim"
-        ]
+            "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he"
+        ],
+        "keywords": ["אורחות תורה", "ארחות תורה"]
     },
     "4": {
         "sources": sources_1 + [
@@ -130,14 +111,23 @@ categories = {
             "https://news.google.com/rss/search?q=טבריה+בניה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he",
-            "https://www.inn.co.il/rss/mivzakim",
-            "https://www.kikar.co.il/rss/mivzakim",
-            "https://www.bhol.co.il/rss/mivzakim"
-        ]
+            "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he"
+        ],
+        "keywords": ["טבריה"]
     },
-    "1": {
-        "sources": sources_1
+    "5": {
+        "sources": sources_1 + [
+            "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+דירות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he"
+        ],
+        "keywords": ["רמת שלמה"]
     }
 }
 
@@ -147,7 +137,7 @@ try:
 except:
     old_news = []
 
-# הפיכת הרשימה ל-Set לצורך חיפוש מהיר משמעותית
+# הפיכת הרשימה ל-Set לצורך חיפוש מהיר
 old_news_set = set(old_news)
 
 SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
@@ -156,6 +146,7 @@ now_il = datetime.now(timezone.utc) + timedelta(hours=3)
 for folder, category in categories.items():
     raw_items = []
     seen = set()
+    keywords = category.get("keywords", [])
 
     for source in category["sources"]:
         feed = feedparser.parse(source)
@@ -170,7 +161,8 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            if age_seconds > 4 * 3600 or age_seconds < -600:
+            # הרחבת חלון הזמנים ל-24 שעות כדי למנוע מצב שבו לא עולות כתבות כלל
+            if age_seconds > 24 * 3600 or age_seconds < -600:
                 continue
 
             if israel_time > now_il:
@@ -180,7 +172,6 @@ for folder, category in categories.items():
             if display_hour == 0:
                 display_hour = 12
 
-            # --- עדכון 1: בניית השעה בצורה מדוברת ותקינה ל-TTS ---
             if israel_time.minute == 0:
                 str_time = f"{display_hour}"
             elif israel_time.minute == 1:
@@ -231,7 +222,6 @@ for folder, category in categories.items():
             summary = " ".join(summary.split())
             summary = summary.lstrip(" .,-–—:?")
             
-            # --- עדכון 2: אם המקור או הכותרת מכילים "מזג אוויר" או "תחזית", לא נחתוך ל-450 תווים ---
             is_weather = "מזג אוויר" in source or "תחזית" in source or "מזג אוויר" in title or "תחזית" in title
             
             if not is_short_source and not is_weather:
@@ -248,6 +238,12 @@ for folder, category in categories.items():
                 news_content = f"{clean_title_q} {summary}"
             else:
                 news_content = summary
+
+            # --- בדיקת סינון מילות מפתח עבור שלוחות 2-5 ---
+            if folder != "1":
+                found_keyword = any(kw in news_content or kw in title for kw in keywords)
+                if not found_keyword:
+                    continue  # מדלג על כתבה שאינה מכילה אף מילת מפתח של השלוחה
 
             news_content = " ".join(news_content.split())
             news_text = f"{str_time}. {news_content}"
@@ -338,7 +334,6 @@ for folder, category in categories.items():
         ):
             new_number = str(max_number + index).zfill(3)
             
-            # שימוש בבלוק with כדי לסגור את הקובץ בצורה בטוחה מיד לאחר השליחה
             with open(wav_name, "rb") as f:
                 files = {"file": f}
                 data = {
@@ -349,7 +344,6 @@ for folder, category in categories.items():
                 response = requests.post(url, files=files, data=data)
                 print(folder, new_number, response.text)
 
-            # ניקוי קבצים מקומיים כדי לא להעמיס על הדיסק
             mp3_name = wav_name.replace(".wav", ".mp3")
             if os.path.exists(wav_name): os.remove(wav_name)
             if os.path.exists(mp3_name): os.remove(mp3_name)
