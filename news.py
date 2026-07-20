@@ -61,7 +61,9 @@ sources_1 = [
     "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עדכונים+שוטפים+או+מבזקים+בזמן+אמת&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מבזקי+חדשות+בזמן+אמת&hl=he&gl=IL&ceid=IL:he"
 ]
 
 # ===========================
@@ -161,23 +163,12 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # הרחבת חלון הזמנים ל-24 שעות כדי למנוע מצב שבו לא עולות כתבות כלל
-            if age_seconds > 24 * 3600 or age_seconds < -600:
+            # שינוי 1: החזרה ל-4 שעות אחרונות
+            if age_seconds > 4 * 3600 or age_seconds < -600:
                 continue
 
             if israel_time > now_il:
                 israel_time = now_il
-
-            display_hour = israel_time.hour % 12
-            if display_hour == 0:
-                display_hour = 12
-
-            if israel_time.minute == 0:
-                str_time = f"{display_hour}"
-            elif israel_time.minute == 1:
-                str_time = f"{display_hour} ודקה"
-            else:
-                str_time = f"{display_hour} ו {israel_time.minute} דקות"
 
             original_title = item.title.strip()
 
@@ -239,14 +230,13 @@ for folder, category in categories.items():
             else:
                 news_content = summary
 
-            # --- בדיקת סינון מילות מפתח עבור שלוחות 2-5 ---
+            # בדיקת סינון מילות מפתח עבור שלוחות 2-5
             if folder != "1":
                 found_keyword = any(kw in news_content or kw in title for kw in keywords)
                 if not found_keyword:
                     continue  # מדלג על כתבה שאינה מכילה אף מילת מפתח של השלוחה
 
             news_content = " ".join(news_content.split())
-            news_text = f"{str_time}. {news_content}"
             normalized_compare = re.sub(r'\s+', '', news_content)
 
             if news_content in seen:
@@ -262,14 +252,43 @@ for folder, category in categories.items():
             
             raw_items.append({
                 "time_obj": israel_time,
-                "text": news_text
+                "news_content": news_content
             })
 
     if not raw_items:
         continue
 
     raw_items.sort(key=lambda x: x["time_obj"])
-    items = [item["text"] for item in raw_items]
+
+    # ===========================
+    # עיבוד הזמנים ובניית הטקסט
+    # ===========================
+    items = []
+    last_assigned_time = None
+
+    for item in raw_items:
+        item_time = item["time_obj"]
+
+        # שינוי 2: מקדם בדקה אחת אם הידיעה הגיעה באותה דקה (או מוקדם יותר)
+        if last_assigned_time and item_time <= last_assigned_time:
+            item_time = last_assigned_time + timedelta(minutes=1)
+
+        last_assigned_time = item_time
+
+        display_hour = item_time.hour % 12
+        if display_hour == 0:
+            display_hour = 12
+
+        # שינוי 3: הוספת המילה "השעה" לפני שעות עגולות
+        if item_time.minute == 0:
+            str_time = f"השעה {display_hour}"
+        elif item_time.minute == 1:
+            str_time = f"{display_hour} ודקה"
+        else:
+            str_time = f"{display_hour} ו {item_time.minute} דקות"
+
+        news_text = f"{str_time}. {item['news_content']}"
+        items.append(news_text)
 
     # ===========================
     # יצירת הטקסט להקראה והמרה ל-WAV
