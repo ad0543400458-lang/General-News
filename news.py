@@ -163,8 +163,8 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # שינוי 1: החזרה ל-4 שעות אחרונות
-            if age_seconds > 4 * 3600 or age_seconds < -600:
+            # סינון: רק כתבות ב-20 הדקות האחרונות (1,200 שניות)
+            if age_seconds > 20 * 60 or age_seconds < -300:
                 continue
 
             if israel_time > now_il:
@@ -215,8 +215,6 @@ for folder, category in categories.items():
             
             is_weather = "מזג אוויר" in source or "תחזית" in source or "מזג אוויר" in title or "תחזית" in title
             
-            if not is_short_source and not is_weather:
-                summary = summary[:450]
 
             if not summary or len(summary) < 20:
                 continue
