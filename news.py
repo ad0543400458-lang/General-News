@@ -136,14 +136,15 @@ categories = {
 try:
     with open("seen_news.json", "r", encoding="utf-8") as f:
         old_news = json.load(f)
-except:
+except Exception:
     old_news = []
 
-# הפיכת הרשימה ל-Set לצורך חיפוש מהיר
 old_news_set = set(old_news)
 
 SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
 now_il = datetime.now(timezone.utc) + timedelta(hours=3)
+
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 for folder, category in categories.items():
     raw_items = []
@@ -151,7 +152,11 @@ for folder, category in categories.items():
     keywords = category.get("keywords", [])
 
     for source in category["sources"]:
-        feed = feedparser.parse(source)
+        try:
+            feed = feedparser.parse(source, agent=USER_AGENT)
+        except Exception as e:
+            print(f"Error parsing source {source}: {e}")
+            continue
 
         for item in feed.entries[:40]:
             if hasattr(item, "published_parsed") and item.published_parsed:
@@ -214,7 +219,6 @@ for folder, category in categories.items():
             summary = summary.lstrip(" .,-–—:?")
             
             is_weather = "מזג אוויר" in source or "תחזית" in source or "מזג אוויר" in title or "תחזית" in title
-            
 
             if not summary or len(summary) < 20:
                 continue
@@ -236,17 +240,23 @@ for folder, category in categories.items():
 
             news_content = " ".join(news_content.split())
             normalized_compare = re.sub(r'\s+', '', news_content)
+            
+            # בדיקת כפילויות חזקה יותר: בודק גם שורש כותרת מקוצר להשוואת גרסאות
+            short_content_key = normalized_compare[:60] if len(normalized_compare) >= 60 else normalized_compare
 
-            if news_content in seen:
+            if news_content in seen or short_content_key in seen:
                 continue
-            if title in old_news_set or normalized_compare in old_news_set:
+            if title in old_news_set or normalized_compare in old_news_set or short_content_key in old_news_set:
                 continue
 
             seen.add(news_content)
+            seen.add(short_content_key)
             old_news.append(title)
             old_news.append(normalized_compare)
+            old_news.append(short_content_key)
             old_news_set.add(title)
             old_news_set.add(normalized_compare)
+            old_news_set.add(short_content_key)
             
             raw_items.append({
                 "time_obj": israel_time,
@@ -256,6 +266,7 @@ for folder, category in categories.items():
     if not raw_items:
         continue
 
+    # מיון מדויק לפי הזמן של הכתבה מהישן לחדש
     raw_items.sort(key=lambda x: x["time_obj"])
 
     # ===========================
@@ -267,7 +278,7 @@ for folder, category in categories.items():
     for item in raw_items:
         item_time = item["time_obj"]
 
-        # שינוי 2: מקדם בדקה אחת אם הידיעה הגיעה באותה דקה (או מוקדם יותר)
+        # מקדם בדקה אחת אם הידיעה הגיעה באותה דקה (או מוקדם יותר) למניעת זמן זהה
         if last_assigned_time and item_time <= last_assigned_time:
             item_time = last_assigned_time + timedelta(minutes=1)
 
@@ -277,7 +288,6 @@ for folder, category in categories.items():
         if display_hour == 0:
             display_hour = 12
 
-        # שינוי 3: הוספת המילה "השעה" לפני שעות עגולות
         if item_time.minute == 0:
             str_time = f"השעה {display_hour}"
         elif item_time.minute == 1:
@@ -325,7 +335,7 @@ for folder, category in categories.items():
     # ===========================
     # העלאה למערכות ימות המשיח
     # ===========================
-    token = os.environ["YEMOT_TOKEN"]
+    token = os.environ.get("YEMOT_TOKEN", "")
     url = "https://www.call2all.co.il/ym/api/UploadFile"
 
     if folder in ["1", "2", "3", "4", "5"]:
@@ -335,7 +345,12 @@ for folder, category in categories.items():
             "path": f"ivr2:/{folder}/"
         }
 
-        result = requests.post(list_url, data=list_data).json()
+        try:
+            result = requests.post(list_url, data=list_data).json()
+        except Exception as e:
+            print(f"Error fetching directory info: {e}")
+            result = {}
+
         max_number = 0
 
         if "files" in result:
@@ -351,15 +366,18 @@ for folder, category in categories.items():
         ):
             new_number = str(max_number + index).zfill(3)
             
-            with open(wav_name, "rb") as f:
-                files = {"file": f}
-                data = {
-                    "token": token,
-                    "path": f"ivr2:/{folder}/{new_number}.wav",
-                    "convertAudio": "1"
-                }
-                response = requests.post(url, files=files, data=data)
-                print(folder, new_number, response.text)
+            try:
+                with open(wav_name, "rb") as f:
+                    files = {"file": f}
+                    data = {
+                        "token": token,
+                        "path": f"ivr2:/{folder}/{new_number}.wav",
+                        "convertAudio": "1"
+                    }
+                    response = requests.post(url, files=files, data=data)
+                    print(folder, new_number, response.text)
+            except Exception as e:
+                print(f"Error uploading file {wav_name}: {e}")
 
             mp3_name = wav_name.replace(".wav", ".mp3")
             if os.path.exists(wav_name): os.remove(wav_name)
@@ -369,16 +387,19 @@ for folder, category in categories.items():
         wav_path = f"news_{folder}.wav"
         mp3_path = f"news_{folder}.mp3"
         
-        with open(wav_path, "rb") as f:
-            files = {"file": f}
-            data = {
-                "token": token,
-                "path": f"ivr2:/{folder}/",
-                "autoNumbering": "true",
-                "convertAudio": "1"
-            }
-            response = requests.post(url, files=files, data=data)
-            print(folder, response.text)
+        try:
+            with open(wav_path, "rb") as f:
+                files = {"file": f}
+                data = {
+                    "token": token,
+                    "path": f"ivr2:/{folder}/",
+                    "autoNumbering": "true",
+                    "convertAudio": "1"
+                }
+                response = requests.post(url, files=files, data=data)
+                print(folder, response.text)
+        except Exception as e:
+            print(f"Error uploading file {wav_path}: {e}")
             
         if os.path.exists(wav_path): os.remove(wav_path)
         if os.path.exists(mp3_path): os.remove(mp3_path)
