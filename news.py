@@ -111,10 +111,9 @@ sources_1 = [
 ]
 
 # ===========================
-# הגדרת קטגוריות מעודכנת (שלוחות 1 ו-2 בלבד)
+# הגדרת קטגוריות מעודכנת
 # ===========================
 
-# ריכוז כל מילות המפתח המבוקשות עבור שלוחה 2
 keywords_folder_2 = [
     # בית שמש
     "בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג",
@@ -141,7 +140,6 @@ keywords_folder_3 = [
     "ירידה במחירי הדיור"
 ]
 
-# מקורות ייעודיים שנאספו מכל השלוחות הקודמות (2-5)
 extra_sources_folder_2 = [
     # מקורות בית שמש
     "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
@@ -192,7 +190,7 @@ categories = {
     "1": {
         "sources": sources_1,
         "keywords": []  # שלוחה 1: מקבלת את כל הכתבות ללא סינון
-},
+    },
     "2": {
         "sources": sources_1 + extra_sources_folder_2,
         "keywords": keywords_folder_2
@@ -202,6 +200,7 @@ categories = {
         "keywords": keywords_folder_3
     }
 }
+
 # טעינת היסטוריה מקובץ לפני תחילת הריצה
 old_news = load_history()
 old_news_set = set(old_news)
@@ -223,9 +222,11 @@ for folder, category in categories.items():
             continue
 
         for item in feed.entries[:40]:
-            # מזהה ייחודי לכתבה (ID או URL) למניעת כפילויות מושלמת
+            # מזהה ייחודי לכתבה המשולב עם השלוחה כדי למנוע חסימה בין שלוחות שונות
             item_id = getattr(item, "id", getattr(item, "link", ""))
-            if item_id and item_id in old_news_set:
+            folder_item_id = f"{folder}_{item_id}" if item_id else ""
+
+            if folder_item_id and folder_item_id in old_news_set:
                 continue
 
             if hasattr(item, "published_parsed") and item.published_parsed:
@@ -237,8 +238,8 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # התיקון: סינון לפי 7 דקות אחרונות בלבד להתאמה להרצת Cron של 5 דקות
-            if age_seconds > 7 * 60 or age_seconds < -300:
+            # סינון לפי 5 דקות בלבד להתאמה מדויקת להרצת Cron של 5 דקות
+            if age_seconds > 5 * 60 or age_seconds < -300:
                 continue
 
             if israel_time > now_il:
@@ -299,7 +300,7 @@ for folder, category in categories.items():
             else:
                 news_content = summary
 
-            # סינון לפי מילות מפתח בשלוחות 2-5
+            # סינון לפי מילות מפתח בשלוחות 2-3
             if folder != "1":
                 found_keyword = any(kw in news_content or kw in title for kw in keywords)
                 if not found_keyword:
@@ -309,26 +310,31 @@ for folder, category in categories.items():
             normalized_compare = re.sub(r'\s+', '', news_content)
             short_content_key = normalized_compare[:60] if len(normalized_compare) >= 60 else normalized_compare
 
+            # מפתחות מותאמים לשלוחה הנוכחית
+            folder_title = f"{folder}_{title}"
+            folder_normalized = f"{folder}_{normalized_compare}"
+            folder_short_key = f"{folder}_{short_content_key}"
+
             # בדיקת כפילויות מול הזיכרון השוטף ומול הקובץ השמור
             if news_content in seen or short_content_key in seen:
                 continue
-            if title in old_news_set or normalized_compare in old_news_set or short_content_key in old_news_set:
+            if folder_title in old_news_set or folder_normalized in old_news_set or folder_short_key in old_news_set:
                 continue
 
             seen.add(news_content)
             seen.add(short_content_key)
             
             # הוספה להיסטוריה הנשמרת
-            if item_id:
-                old_news.append(item_id)
-                old_news_set.add(item_id)
+            if folder_item_id:
+                old_news.append(folder_item_id)
+                old_news_set.add(folder_item_id)
 
-            old_news.append(title)
-            old_news.append(normalized_compare)
-            old_news.append(short_content_key)
-            old_news_set.add(title)
-            old_news_set.add(normalized_compare)
-            old_news_set.add(short_content_key)
+            old_news.append(folder_title)
+            old_news.append(folder_normalized)
+            old_news.append(folder_short_key)
+            old_news_set.add(folder_title)
+            old_news_set.add(folder_normalized)
+            old_news_set.add(folder_short_key)
             
             raw_items.append({
                 "time_obj": israel_time,
