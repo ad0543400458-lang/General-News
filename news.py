@@ -222,13 +222,6 @@ for folder, category in categories.items():
             continue
 
         for item in feed.entries[:40]:
-            # מזהה ייחודי לכתבה המשולב עם השלוחה כדי למנוע חסימה בין שלוחות שונות
-            item_id = getattr(item, "id", getattr(item, "link", ""))
-            folder_item_id = f"{folder}_{item_id}" if item_id else ""
-
-            if folder_item_id and folder_item_id in old_news_set:
-                continue
-
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 israel_time = published.astimezone(TIMEZONE)
@@ -238,8 +231,8 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # סינון לפי 5 דקות בלבד להתאמה מדויקת להרצת Cron של 5 דקות
-            if age_seconds > 5 * 60 or age_seconds < -300:
+            # חלון זמן של שעה אחת (3600 שניות) למניעת פספוס ידיעות עקב דיליי בפיד ה-RSS
+            if age_seconds > 3600 or age_seconds < -300:
                 continue
 
             if israel_time > now_il:
@@ -247,10 +240,12 @@ for folder, category in categories.items():
 
             original_title = item.title.strip()
 
-            title = re.sub(r'<.*?>', '', original_title)
-            title = re.sub(r'[A-Za-z]+', '', title)
-            title = " ".join(title.split())
-            title = re.sub(r'[.,;:"\'()\-%–—-]', '', title)
+            # הסרת שם האתר מסוף הכותרת בגוגל ניוז (למשל: "כותרת - מעריב")
+            clean_title = re.sub(r'\s*-\s*[^\-]+\s*$', '', original_title)
+            clean_title = re.sub(r'<.*?>', '', clean_title)
+            clean_title = re.sub(r'[A-Za-z]+', '', clean_title)
+            clean_title = " ".join(clean_title.split())
+            clean_title = re.sub(r'[.,;:"\'()\-%–—-]', '', clean_title)
 
             link = getattr(item, "link", "")
             is_short_source = any(domain in link for domain in SHORT_DOMAINS)
@@ -279,11 +274,11 @@ for folder, category in categories.items():
             summary = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', summary)
             summary = " ".join(summary.split())
 
-            title_compare = re.sub(r'\s+', '', title)
+            title_compare = re.sub(r'\s+', '', clean_title)
             summary_compare = re.sub(r'\s+', '', summary)
 
             if summary_compare.startswith(title_compare):
-                summary = summary[len(title):].lstrip(" .,:-–—?")
+                summary = summary[len(clean_title):].lstrip(" .,:-–—?")
 
             summary = " ".join(summary.split())
             summary = summary.lstrip(" .,-–—:?")
@@ -295,46 +290,34 @@ for folder, category in categories.items():
             summary = " ".join(summary.split())
 
             if original_title.strip().endswith('?'):
-                clean_title_q = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', original_title).strip()
+                clean_title_q = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', clean_title).strip()
                 news_content = f"{clean_title_q} {summary}"
             else:
                 news_content = summary
 
             # סינון לפי מילות מפתח בשלוחות 2-3
             if folder != "1":
-                found_keyword = any(kw in news_content or kw in title for kw in keywords)
+                found_keyword = any(kw in news_content or kw in clean_title for kw in keywords)
                 if not found_keyword:
                     continue
 
             news_content = " ".join(news_content.split())
-            normalized_compare = re.sub(r'\s+', '', news_content)
-            short_content_key = normalized_compare[:60] if len(normalized_compare) >= 60 else normalized_compare
 
-            # מפתחות מותאמים לשלוחה הנוכחית
-            folder_title = f"{folder}_{title}"
-            folder_normalized = f"{folder}_{normalized_compare}"
-            folder_short_key = f"{folder}_{short_content_key}"
+            # זיהוי כפילויות חכם מבוסס מילים בעברית בלבד
+            hebrew_words = re.findall(r'[\u0590-\u05FF]+', news_content)
+            if len(hebrew_words) < 3:
+                continue
+
+            # יצירת טביעת אצבע המורכבת מהשלוחה ומתחילת הידיעה (7 המילים הראשונות בעברית)
+            fingerprint = f"{folder}_" + "".join(hebrew_words[:7])
 
             # בדיקת כפילויות מול הזיכרון השוטף ומול הקובץ השמור
-            if news_content in seen or short_content_key in seen:
-                continue
-            if folder_title in old_news_set or folder_normalized in old_news_set or folder_short_key in old_news_set:
+            if fingerprint in seen or fingerprint in old_news_set:
                 continue
 
-            seen.add(news_content)
-            seen.add(short_content_key)
-            
-            # הוספה להיסטוריה הנשמרת
-            if folder_item_id:
-                old_news.append(folder_item_id)
-                old_news_set.add(folder_item_id)
-
-            old_news.append(folder_title)
-            old_news.append(folder_normalized)
-            old_news.append(folder_short_key)
-            old_news_set.add(folder_title)
-            old_news_set.add(folder_normalized)
-            old_news_set.add(folder_short_key)
+            seen.add(fingerprint)
+            old_news.append(fingerprint)
+            old_news_set.add(fingerprint)
             
             raw_items.append({
                 "time_obj": israel_time,
