@@ -111,71 +111,97 @@ sources_1 = [
 ]
 
 # ===========================
-# הגדרת קטגוריות
+# הגדרת קטגוריות מעודכנת (שלוחות 1 ו-2 בלבד)
 # ===========================
+
+# ריכוז כל מילות המפתח המבוקשות עבור שלוחה 2
+keywords_folder_2 = [
+    # בית שמש
+    "בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג",
+    # ישיבות ומוסדות
+    "אורחות תורה", "ארחות תורה",
+    # טבריה
+    "טבריה", "טבריא", "שיכון ד",
+    # רמת שלמה
+    "רמת שלמה"
+]
+
+keywords_folder_3 = [
+    "ירידת מחירים",
+    "ירידה במחירי הדירות",
+    "מחירי הדירות ירדו",
+    "הוזלת דירות",
+    "ירידת מחירי הנדלן",
+    "ירידה במחירי הנדלן",
+    "הוזלת מחירי הדיור",
+    "הוזלה במחירי הדירות",
+    "נפילת מחירי הדירות",
+    "האטה במחירי הדיור",
+    "הוזלת הדירות",
+    "ירידה במחירי הדיור"
+]
+
+# מקורות ייעודיים שנאספו מכל השלוחות הקודמות (2-5)
+extra_sources_folder_2 = [
+    # מקורות בית שמש
+    "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+חדשות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+נדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+בניה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+תחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+בית+שמש+ג&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+
+    # מקורות אורחות תורה
+    "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ארחות+תורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
+
+    # מקורות טבריה
+    "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+חדשות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+נדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+בניה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he",
+
+    # מקורות רמת שלמה
+    "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+דירות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he"
+]
+
 categories = {
     "1": {
         "sources": sources_1,
-        "keywords": []
-    },
+        "keywords": []  # שלוחה 1: מקבלת את כל הכתבות ללא סינון
+},
     "2": {
-        "sources": sources_1 + [
-            "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש+חדשות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש+נדלן&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש+בניה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש+תחבורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בית+שמש+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+בית+שמש+ג&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": ["בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג"]
+        "sources": sources_1 + extra_sources_folder_2,
+        "keywords": keywords_folder_2
     },
     "3": {
-        "sources": sources_1 + [
-            "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ארחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": ["אורחות תורה", "ארחות תורה"]
-    },
-    "4": {
-        "sources": sources_1 + [
-            "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+חדשות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+נדלן&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+בניה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": ["טבריה"]
-    },
-    "5": {
-        "sources": sources_1 + [
-            "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+דירות&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
-            "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he"
-        ],
-        "keywords": ["רמת שלמה"]
+        "sources": sources_1 + extra_sources_folder_2,
+        "keywords": keywords_folder_3
     }
 }
-
 # טעינת היסטוריה מקובץ לפני תחילת הריצה
 old_news = load_history()
 old_news_set = set(old_news)
