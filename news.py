@@ -6,6 +6,33 @@ from pydub import AudioSegment
 import json
 import re
 from datetime import datetime, timezone, timedelta
+import pytz
+
+# ===========================
+# הגדרות אזור זמן וזיכרון קבוע עבור Cron
+# ===========================
+TIMEZONE = pytz.timezone('Asia/Jerusalem')
+HISTORY_FILE = 'seen_news.json'
+
+def load_history():
+    """טעינת היסטוריית הכתבות שכבר עובדו כדי למנוע כפילויות בין הרצות Cron"""
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading history file: {e}")
+            return []
+    return []
+
+def save_history(history_list):
+    """שמירת ההיסטוריה לקובץ JSON"""
+    try:
+        # שומרים רק את 3000 הפריטים האחרונים למניעת קובץ כבד מדי
+        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(history_list[-3000:], f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Error saving history file: {e}")
 
 # ===========================
 # מקורות משותפים (שלוחה 1)
@@ -67,13 +94,12 @@ sources_1 = [
 ]
 
 # ===========================
-# הגדרת קטגוריות, מקורות ומילות מפתח לסינון
+# הגדרת קטגוריות
 # ===========================
-
 categories = {
     "1": {
         "sources": sources_1,
-        "keywords": []  # שלוחה 1 מקבלת את הכל ללא סינון
+        "keywords": []
     },
     "2": {
         "sources": sources_1 + [
@@ -133,17 +159,12 @@ categories = {
     }
 }
 
-try:
-    with open("seen_news.json", "r", encoding="utf-8") as f:
-        old_news = json.load(f)
-except Exception:
-    old_news = []
-
+# טעינת היסטוריה מקובץ לפני תחילת הריצה
+old_news = load_history()
 old_news_set = set(old_news)
 
 SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
-now_il = datetime.now(timezone.utc) + timedelta(hours=3)
-
+now_il = datetime.now(TIMEZONE)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 for folder, category in categories.items():
@@ -161,7 +182,7 @@ for folder, category in categories.items():
         for item in feed.entries[:40]:
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
-                israel_time = published + timedelta(hours=3)
+                israel_time = published.astimezone(TIMEZONE)
             else:
                 israel_time = now_il
 
@@ -217,8 +238,6 @@ for folder, category in categories.items():
 
             summary = " ".join(summary.split())
             summary = summary.lstrip(" .,-–—:?")
-            
-            is_weather = "מזג אוויר" in source or "תחזית" in source or "מזג אוויר" in title or "תחזית" in title
 
             if not summary or len(summary) < 20:
                 continue
@@ -232,18 +251,17 @@ for folder, category in categories.items():
             else:
                 news_content = summary
 
-            # בדיקת סינון מילות מפתח עבור שלוחות 2-5
+            # סינון לפי מילות מפתח בשלוחות 2-5
             if folder != "1":
                 found_keyword = any(kw in news_content or kw in title for kw in keywords)
                 if not found_keyword:
-                    continue  # מדלג על כתבה שאינה מכילה אף מילת מפתח של השלוחה
+                    continue
 
             news_content = " ".join(news_content.split())
             normalized_compare = re.sub(r'\s+', '', news_content)
-            
-            # בדיקת כפילויות חזקה יותר: בודק גם שורש כותרת מקוצר להשוואת גרסאות
             short_content_key = normalized_compare[:60] if len(normalized_compare) >= 60 else normalized_compare
 
+            # בדיקת כפילויות מול הזיכרון השוטף ומול הקובץ הנשמר
             if news_content in seen or short_content_key in seen:
                 continue
             if title in old_news_set or normalized_compare in old_news_set or short_content_key in old_news_set:
@@ -251,6 +269,8 @@ for folder, category in categories.items():
 
             seen.add(news_content)
             seen.add(short_content_key)
+            
+            # הוספה להיסטוריה הנשמרת בקובץ
             old_news.append(title)
             old_news.append(normalized_compare)
             old_news.append(short_content_key)
@@ -266,7 +286,7 @@ for folder, category in categories.items():
     if not raw_items:
         continue
 
-    # מיון מדויק לפי הזמן של הכתבה מהישן לחדש
+    # מיון לפי זמן הידיעה מהישן לחדש
     raw_items.sort(key=lambda x: x["time_obj"])
 
     # ===========================
@@ -299,7 +319,7 @@ for folder, category in categories.items():
         items.append(news_text)
 
     # ===========================
-    # יצירת הטקסט להקראה והמרה ל-WAV
+    # יצירת הקבצים והמרת שמע
     # ===========================
     if folder in ["1", "2", "3", "4", "5"]:
         for index, news in enumerate(items):
@@ -316,24 +336,8 @@ for folder, category in categories.items():
             audio = audio.set_channels(1)
             audio.export(wav_name, format="wav")
 
-    else:
-        text = ""
-        for i, news in enumerate(items):
-            text += news.strip()
-            if i != len(items) - 1:
-                text += "\n\nעדכון נוסף.\n\n"
-
-        tts = gTTS(text, lang="iw")
-        tts.save(f"news_{folder}.mp3")
-
-        audio = AudioSegment.from_mp3(f"news_{folder}.mp3")
-        audio = audio.speedup(playback_speed=1.25)
-        audio = audio.set_frame_rate(8000)
-        audio = audio.set_channels(1)
-        audio.export(f"news_{folder}.wav", format="wav")
-
     # ===========================
-    # העלאה למערכות ימות המשיח
+    # העלאה לימות המשיח
     # ===========================
     token = os.environ.get("YEMOT_TOKEN", "")
     url = "https://www.call2all.co.il/ym/api/UploadFile"
@@ -383,31 +387,5 @@ for folder, category in categories.items():
             if os.path.exists(wav_name): os.remove(wav_name)
             if os.path.exists(mp3_name): os.remove(mp3_name)
 
-    else:
-        wav_path = f"news_{folder}.wav"
-        mp3_path = f"news_{folder}.mp3"
-        
-        try:
-            with open(wav_path, "rb") as f:
-                files = {"file": f}
-                data = {
-                    "token": token,
-                    "path": f"ivr2:/{folder}/",
-                    "autoNumbering": "true",
-                    "convertAudio": "1"
-                }
-                response = requests.post(url, files=files, data=data)
-                print(folder, response.text)
-        except Exception as e:
-            print(f"Error uploading file {wav_path}: {e}")
-            
-        if os.path.exists(wav_path): os.remove(wav_path)
-        if os.path.exists(mp3_path): os.remove(mp3_path)
-
-with open("seen_news.json", "w", encoding="utf-8") as f:
-    json.dump(
-        old_news[-3000:], 
-        f,
-        ensure_ascii=False,
-        indent=2
-    )
+# שמירת כל הכתבות שעלו לקובץ JSON קבוע בסוף הריצה
+save_history(old_news)
