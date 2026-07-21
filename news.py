@@ -49,13 +49,9 @@ sources_1 = [
     "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טכנולוגיה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בינה+מלאכותית&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בני+ברק&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בריאות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=מדע&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=פיתוח+עירוני&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=תשתיות+ישראל&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
@@ -72,6 +68,27 @@ sources_1 = [
     "https://news.google.com/rss/search?q=כתבים+או+פרשנים+או+עיתונאים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מבזקים+רוטר+או+חמאל+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ברשתות+החברתיות+או+קבוצות+עדכון&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=יאיר+שרקי&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שלמה+ריזל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=אבישי+גרינצייג&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מנחם+קולדצקי&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=דורון+קדוש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=יוסי+יהושוע&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ינון+מגל&hl=he&gl=IL&ceid=IL:he",
+    # מבזקים ועדכונים מהירים בזמן אמת
+    "https://news.google.com/rss/search?q=מבזק+חדשות+זמן+אמת&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=דיווחים+שוטפים+מבזקים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עדכון+מבזק+חם&hl=he&gl=IL&ceid=IL:he",
+    
+    # עיתונאים וכתבים נוספים שמפרסמים עדכונים תכופים
+    "https://news.google.com/rss/search?q=מיכאל+שמש+ציוץ&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עקיבא+נוביק&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מוטי+קסטל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שילה+פריד&hl=he&gl=IL&ceid=IL:he",
+    
+    # תחבורה, כבישים ותשתיות (מתעדכן רציף)
+    "https://news.google.com/rss/search?q=עומסי+תנועה+חסימות+כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שינויים+בתחבורה+הציבורית&hl=he&gl=IL&ceid=IL:he",
     "https://www.ice.co.il/rss.xml",           
     "https://www.bizportal.co.il/rss/bizportalrss.xml", 
     "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
@@ -180,6 +197,11 @@ for folder, category in categories.items():
             continue
 
         for item in feed.entries[:40]:
+            # מזהה ייחודי לכתבה (ID או URL) למניעת כפילויות מושלמת
+            item_id = getattr(item, "id", getattr(item, "link", ""))
+            if item_id and item_id in old_news_set:
+                continue
+
             if hasattr(item, "published_parsed") and item.published_parsed:
                 published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
                 israel_time = published.astimezone(TIMEZONE)
@@ -189,8 +211,8 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # סינון: רק כתבות ב-20 הדקות האחרונות (1,200 שניות)
-            if age_seconds > 20 * 60 or age_seconds < -300:
+            # התיקון: סינון לפי 7 דקות אחרונות בלבד להתאמה להרצת Cron של 5 דקות
+            if age_seconds > 7 * 60 or age_seconds < -300:
                 continue
 
             if israel_time > now_il:
@@ -261,7 +283,7 @@ for folder, category in categories.items():
             normalized_compare = re.sub(r'\s+', '', news_content)
             short_content_key = normalized_compare[:60] if len(normalized_compare) >= 60 else normalized_compare
 
-            # בדיקת כפילויות מול הזיכרון השוטף ומול הקובץ הנשמר
+            # בדיקת כפילויות מול הזיכרון השוטף ומול הקובץ השמור
             if news_content in seen or short_content_key in seen:
                 continue
             if title in old_news_set or normalized_compare in old_news_set or short_content_key in old_news_set:
@@ -270,7 +292,11 @@ for folder, category in categories.items():
             seen.add(news_content)
             seen.add(short_content_key)
             
-            # הוספה להיסטוריה הנשמרת בקובץ
+            # הוספה להיסטוריה הנשמרת
+            if item_id:
+                old_news.append(item_id)
+                old_news_set.add(item_id)
+
             old_news.append(title)
             old_news.append(normalized_compare)
             old_news.append(short_content_key)
@@ -298,7 +324,7 @@ for folder, category in categories.items():
     for item in raw_items:
         item_time = item["time_obj"]
 
-        # מקדם בדקה אחת אם הידיעה הגיעה באותה דקה (או מוקדם יותר) למניעת זמן זהה
+        # מקדם בדקה אחת אם הידיעה הגיעה באותה דקה למניעת זמן זהה
         if last_assigned_time and item_time <= last_assigned_time:
             item_time = last_assigned_time + timedelta(minutes=1)
 
