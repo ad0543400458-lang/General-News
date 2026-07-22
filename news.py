@@ -1,10 +1,11 @@
 import feedparser
 import os
 import requests
-from gtts import gTTS
+from gTTS import gTTS
 from pydub import AudioSegment
 import json
 import re
+import hashlib
 from datetime import datetime, timezone, timedelta
 import pytz
 
@@ -28,34 +29,43 @@ def load_history():
 def save_history(history_list):
     """שמירת ההיסטוריה לקובץ JSON"""
     try:
-        # שומרים רק את 3000 הפריטים האחרונים למניעת קובץ כבד מדי
+        # שומרים את 5000 הפריטים האחרונים למניעת חזרות לאורך זמן
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(history_list[-3000:], f, ensure_ascii=False, indent=2)
+            json.dump(history_list[-5000:], f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"Error saving history file: {e}")
 
 # ===========================
-# מקורות משותפים (שלוחה 1)
+# מיפוי עיתונאים לציון שמם בהקראה
 # ===========================
-sources_1 = [
+JOURNALISTS_MAP = {
+    "עמית+סגל": "עמית סגל",
+    "מיכאל+שמש": "מיכאל שמש",
+    "יעקב+ברדוגו": "יעקב ברדוגו",
+    "יאיר+שרקי": "יאיר שרקי",
+    "שלמה+ריזל": "שלמה ריזל",
+    "אבישי+גרינצייג": "אבישי גרינצייג",
+    "מנחם+קולדצקי": "מנחם קולדצקי",
+    "דורון+קדוש": "דורון קדוש",
+    "יוסי+יהושוע": "יוסי יהושוע",
+    "ינון+מגל": "ינון מגל",
+    "עקיבא+נוביק": "עקיבא נוביק",
+    "מוטי+קסטל": "מוטי קסטל",
+    "שילה+פריד": "שילה פריד",
+    "אטילה+שומפלבי": "אטילה שומפלבי",
+    "יקיר+מויאל": "יקיר מויאל"
+}
+
+# ===========================
+# חלוקת מקורות לפי קטגוריות
+# ===========================
+
+# 1. חדשות כלליות, מבזקים ועיתונאים (ללא כלכלה ותחבורה)
+sources_general = [
     "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ישראל&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בני+ברק&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=פיתוח+עירוני&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=תשתיות+ישראל&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
     "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
     "https://rss.walla.co.il/feed/22", 
     "https://news.google.com/rss/search?q=עמית+סגל+ציוץ&hl=he&gl=IL&ceid=IL:he",
@@ -75,133 +85,107 @@ sources_1 = [
     "https://news.google.com/rss/search?q=דורון+קדוש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=יוסי+יהושוע&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ינון+מגל&hl=he&gl=IL&ceid=IL:he",
-    # מבזקים ועדכונים מהירים בזמן אמת
     "https://news.google.com/rss/search?q=מבזק+חדשות+זמן+אמת&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=דיווחים+שוטפים+מבזקים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=עדכון+מבזק+חם&hl=he&gl=IL&ceid=IL:he",
-    
-    # עיתונאים וכתבים נוספים שמפרסמים עדכונים תכופים
     "https://news.google.com/rss/search?q=מיכאל+שמש+ציוץ&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=עקיבא+נוביק&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מוטי+קסטל&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שילה+פריד&hl=he&gl=IL&ceid=IL:he",
-    
-    # תחבורה, כבישים ותשתיות (מתעדכן רציף)
-    "https://news.google.com/rss/search?q=עומסי+תנועה+חסימות+כבישים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=שינויים+בתחבורה+הציבורית&hl=he&gl=IL&ceid=IL:he",
-    "https://www.ice.co.il/rss.xml",           
-    "https://www.bizportal.co.il/rss/bizportalrss.xml", 
     "https://news.google.com/rss/search?q=מבזק+חדשות+או+מבזקים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=דיווח+ראשוני+או+חדשות+מתפרצות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ציוצים+עיתונאים+או+כתבים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=אטילה+שומפלבי+או+יקיר+מויאל&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=חדשות+רוטר+או+חמאל&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=משרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=פיתוח+עירוני+ירושלים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=עיריית+בני+ברק+חדשות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=תנופת+בנייה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=פרויקטים+חדשים+טבריה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מזג+האוויר+תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=עדכונים+שוטפים+או+מבזקים+בזמן+אמת&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מבזקי+חדשות+בזמן+אמת&hl=he&gl=IL&ceid=IL:he"
 ]
 
-# ===========================
-# הגדרת קטגוריות מעודכנת
-# ===========================
-
-keywords_folder_2 = [
-    # בית שמש
-    "בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג",
-    # ישיבות ומוסדות
-    "אורחות תורה", "ארחות תורה",
-    # טבריה
-    "טבריה", "טבריא", "שיכון ד",
-    # רמת שלמה
-    "רמת שלמה"
+# 2. כלכלה ונדל"ן (שלוחה 3 בלבד)
+sources_economy = [
+    "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://www.ice.co.il/rss.xml",           
+    "https://www.bizportal.co.il/rss/bizportalrss.xml", 
+    "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he"
 ]
 
-keywords_folder_3 = [
-    "ירידת מחירים",
-    "ירידה במחירי הדירות",
-    "מחירי הדירות ירדו",
-    "הוזלת דירות",
-    "ירידת מחירי הנדלן",
-    "ירידה במחירי הנדלן",
-    "הוזלת מחירי הדיור",
-    "הוזלה במחירי הדירות",
-    "נפילת מחירי הדירות",
-    "האטה במחירי הדיור",
-    "הוזלת הדירות",
-    "ירידה במחירי הדיור"
+# 3. תחבורה וכבישים (שלוחה 4 בלבד)
+sources_transport = [
+    "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רכבת+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רכבת+קלה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עומסי+תנועה+חסימות+כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שינויים+בתחבורה+הציבורית&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=משרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he"
 ]
 
-extra_sources_folder_2 = [
-    # מקורות בית שמש
+# 4. מקורות מקומיים (שלוחה 2)
+sources_local = [
     "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בית+שמש+חדשות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בית+שמש+נדלן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בית+שמש+בניה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בית+שמש+תחבורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בית+שמש+כבישים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+בית+שמש+ג&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=פתרונות+דיור+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-
-    # מקורות אורחות תורה
     "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ארחות+תורה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=אורחות+תורה+בני+ברק&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=ראש+ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בוגרי+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-
-    # מקורות טבריה
     "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה+חדשות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה+נדלן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה+בניה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה+תחבורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה+כבישים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה+התפתחות&hl=he&gl=IL&ceid=IL:he",
-
-    # מקורות רמת שלמה
     "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+בניה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+דירות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+עירייה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+תחבורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+כבישים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+קהילה&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he"
+]
+
+# מילות מפתח לשלוחות
+keywords_folder_2 = [
+    "בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג",
+    "אורחות תורה", "ארחות תורה", "טבריה", "טבריא", "שיכון ד", "רמת שלמה"
+]
+
+keywords_folder_3 = [
+    "ירידת מחירים", "ירידה במחירי הדירות", "מחירי הדירות ירדו", "הוזלת דירות",
+    "ירידת מחירי הנדלן", "ירידה במחירי הנדלן", "הוזלת מחירי הדיור", "הוזלה במחירי הדירות",
+    "נפילת מחירי הדירות", "האטה במחירי הדיור", "הוזלת הדירות", "ירידה במחירי הדיור",
+    "כלכלה", "משכנתא", "משכנתאות", "בנק ישראל", "ריבית", "נדלן", "דיור"
+]
+
+keywords_folder_4 = [
+    "תחבורה", "כביש", "כבישים", "רכבת", "רכבת ישראל", "רכבת קלה",
+    "פקק", "פקקים", "עומס תנועה", "עומסי תנועה", "חסימה", "חסימות", "משרד התחבורה"
 ]
 
 categories = {
     "1": {
-        "sources": sources_1,
-        "keywords": []  # שלוחה 1: מקבלת את כל הכתבות ללא סינון
+        "sources": sources_general,
+        "keywords": []  # שלוחה 1: מקבלת את כל המבזקים הכלליים
     },
     "2": {
-        "sources": sources_1 + extra_sources_folder_2,
+        "sources": sources_general + sources_local,
         "keywords": keywords_folder_2
     },
     "3": {
-        "sources": sources_1 + extra_sources_folder_2,
+        "sources": sources_economy,
         "keywords": keywords_folder_3
+    },
+    "4": {
+        "sources": sources_transport,
+        "keywords": keywords_folder_4
     }
 }
 
-# טעינת היסטוריה מקובץ לפני תחילת הריצה
+# טעינת היסטוריה מקובץ JSON
 old_news = load_history()
 old_news_set = set(old_news)
 
@@ -209,12 +193,28 @@ SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
 now_il = datetime.now(TIMEZONE)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
+def clean_text_for_tts(text):
+    """מנקה סימני פיסוק מיותרים ומקפים שגורמים לעצירות מיותרות בהקראה"""
+    text = re.sub(r'[\"\']', '', text)               # הסרת מרכאות ובגרים
+    text = re.sub(r'[\-–—]', ' ', text)              # המרת מקפים לרווח
+    text = re.sub(r'[,;:]', ' ', text)               # הסרת פסיקים ונקודתיים שקוטעים משפט
+    text = re.sub(r'[\(\)\[\]\{\}]', '', text)       # הסרת סוגריים
+    text = re.sub(r'\s+', ' ', text).strip()         # ניקוי רווחים כפולים
+    return text
+
 for folder, category in categories.items():
     raw_items = []
     seen = set()
     keywords = category.get("keywords", [])
 
     for source in category["sources"]:
+        # זיהוי עיתונאי לפי מנוע החיפוש בפיד
+        journalist_name = None
+        for key, name in JOURNALISTS_MAP.items():
+            if key in source:
+                journalist_name = name
+                break
+
         try:
             feed = feedparser.parse(source, agent=USER_AGENT)
         except Exception as e:
@@ -231,8 +231,8 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # חלון זמן של שעה אחת (3600 שניות) למניעת פספוס ידיעות עקב דיליי בפיד ה-RSS
-            if age_seconds > 3600 or age_seconds < -300:
+            # חלון זמן של חצי שעה בלבד (1800 שניות)
+            if age_seconds > 1800 or age_seconds < -300:
                 continue
 
             if israel_time > now_il:
@@ -240,12 +240,13 @@ for folder, category in categories.items():
 
             original_title = item.title.strip()
 
-            # הסרת שם האתר מסוף הכותרת בגוגל ניוז (למשל: "כותרת - מעריב")
+            # בדיקה האם הידיעה היא בנושא מזג אוויר/תחזית
+            is_weather = "תחזית" in original_title or "מזג אוויר" in original_title
+
+            # הסרת שם האתר מסוף הכותרת בגוגל ניוז
             clean_title = re.sub(r'\s*-\s*[^\-]+\s*$', '', original_title)
             clean_title = re.sub(r'<.*?>', '', clean_title)
             clean_title = re.sub(r'[A-Za-z]+', '', clean_title)
-            clean_title = " ".join(clean_title.split())
-            clean_title = re.sub(r'[.,;:"\'()\-%–—-]', '', clean_title)
 
             link = getattr(item, "link", "")
             is_short_source = any(domain in link for domain in SHORT_DOMAINS)
@@ -267,58 +268,64 @@ for folder, category in categories.items():
                 summary,
                 flags=re.IGNORECASE
             )
-
             summary = re.sub(r'[A-Za-z]+', '', summary)
-            summary = re.sub(r'[<>/\[\]{}|*#@]', '', summary)
-            summary = re.sub(r'[.,;:"\'()\-%–—-]', '', summary)
-            summary = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', summary)
-            summary = " ".join(summary.split())
 
-            title_compare = re.sub(r'\s+', '', clean_title)
-            summary_compare = re.sub(r'\s+', '', summary)
+            if "תחזית" in summary or "מזג אוויר" in summary:
+                is_weather = True
 
-            if summary_compare.startswith(title_compare):
-                summary = summary[len(clean_title):].lstrip(" .,:-–—?")
+            # טיפול במזג אוויר - הבאת הכתבה במלואה
+            if is_weather:
+                news_content = f"{clean_title}. {summary}"
+            else:
+                # ניקוי רגיל לכתבות
+                clean_title_fmt = clean_text_for_tts(clean_title)
+                clean_summary_fmt = clean_text_for_tts(summary)
 
-            summary = " ".join(summary.split())
-            summary = summary.lstrip(" .,-–—:?")
+                title_compare = re.sub(r'\s+', '', clean_title_fmt)
+                summary_compare = re.sub(r'\s+', '', clean_summary_fmt)
 
-            if not summary or len(summary) < 20:
+                if summary_compare.startswith(title_compare):
+                    clean_summary_fmt = clean_summary_fmt[len(clean_title_fmt):].strip()
+
+                if not clean_summary_fmt or len(clean_summary_fmt) < 15:
+                    news_content = clean_title_fmt
+                else:
+                    news_content = clean_summary_fmt
+
+            news_content = re.sub(r'\bחדשות\b', '', news_content).strip()
+            news_content = clean_text_for_tts(news_content)
+
+            if not news_content or len(news_content) < 10:
                 continue
 
-            summary = re.sub(r'\bחדשות\b', '', summary).strip()
-            summary = " ".join(summary.split())
+            # אם זו כתבת עיתונאי - הוספת שמו במידה ולא מוזכר בתחילת הכתבה
+            if journalist_name and not news_content.startswith(journalist_name):
+                news_content = f"{journalist_name} מדווח: {news_content}"
 
-            if original_title.strip().endswith('?'):
-                clean_title_q = re.sub(r'[^\u0590-\u05FF0-9.,? ]', ' ', clean_title).strip()
-                news_content = f"{clean_title_q} {summary}"
-            else:
-                news_content = summary
-
-            # סינון לפי מילות מפתח בשלוחות 2-3
-            if folder != "1":
+            # סינון לפי מילות מפתח בשלוחות 2, 3, 4
+            if folder != "1" and keywords:
                 found_keyword = any(kw in news_content or kw in clean_title for kw in keywords)
                 if not found_keyword:
                     continue
 
-            news_content = " ".join(news_content.split())
-
-            # זיהוי כפילויות חכם מבוסס מילים בעברית בלבד
+            # ===========================
+            # מנגנון זיהוי כפילויות היקפי (Hash-Based)
+            # ===========================
             hebrew_words = re.findall(r'[\u0590-\u05FF]+', news_content)
             if len(hebrew_words) < 3:
                 continue
 
-            # יצירת טביעת אצבע המורכבת מהשלוחה ומתחילת הידיעה (7 המילים הראשונות בעברית)
-            fingerprint = f"{folder}_" + "".join(hebrew_words[:7])
+            # יצירת טביעת אצבע ייחודית מהקישור ומתחילת הכתבה
+            unique_str = f"{folder}_{link}_{''.join(hebrew_words[:8])}"
+            fingerprint = hashlib.md5(unique_str.encode('utf-8')).hexdigest()
 
-            # בדיקת כפילויות מול הזיכרון השוטף ומול הקובץ השמור
             if fingerprint in seen or fingerprint in old_news_set:
                 continue
 
             seen.add(fingerprint)
             old_news.append(fingerprint)
             old_news_set.add(fingerprint)
-            
+
             raw_items.append({
                 "time_obj": israel_time,
                 "news_content": news_content
@@ -339,7 +346,6 @@ for folder, category in categories.items():
     for item in raw_items:
         item_time = item["time_obj"]
 
-        # מקדם בדקה אחת אם הידיעה הגיעה באותה דקה למניעת זמן זהה
         if last_assigned_time and item_time <= last_assigned_time:
             item_time = last_assigned_time + timedelta(minutes=1)
 
@@ -354,7 +360,7 @@ for folder, category in categories.items():
         elif item_time.minute == 1:
             str_time = f"{display_hour} ודקה"
         else:
-            str_time = f"{display_hour} ו {item_time.minute} דקות"
+            str_time = f"{display_hour} ו-{item_time.minute} דקות"
 
         news_text = f"{str_time}. {item['news_content']}"
         items.append(news_text)
@@ -362,7 +368,7 @@ for folder, category in categories.items():
     # ===========================
     # יצירת הקבצים והמרת שמע
     # ===========================
-    if folder in ["1", "2", "3", "4", "5"]:
+    if folder in ["1", "2", "3", "4"]:
         for index, news in enumerate(items):
             tts = gTTS(news.strip(), lang="iw")
 
@@ -383,7 +389,7 @@ for folder, category in categories.items():
     token = os.environ.get("YEMOT_TOKEN", "")
     url = "https://www.call2all.co.il/ym/api/UploadFile"
 
-    if folder in ["1", "2", "3", "4", "5"]:
+    if folder in ["1", "2", "3", "4"]:
         list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
         list_data = {
             "token": token,
@@ -399,7 +405,7 @@ for folder, category in categories.items():
         max_number = 0
 
         if "files" in result:
-            for file in result["files"]:
+            for file in result.get("files", []):
                 name = file.get("name", "")
                 number = re.findall(r'\d+', name)
                 if number:
@@ -410,7 +416,7 @@ for folder, category in categories.items():
             start=1
         ):
             new_number = str(max_number + index).zfill(3)
-            
+
             try:
                 with open(wav_name, "rb") as f:
                     files = {"file": f}
@@ -428,5 +434,5 @@ for folder, category in categories.items():
             if os.path.exists(wav_name): os.remove(wav_name)
             if os.path.exists(mp3_name): os.remove(mp3_name)
 
-# שמירת כל הכתבות שעלו לקובץ JSON קבוע בסוף הריצה
+# שמירת היסטוריית הכתבות בסוף הריצה
 save_history(old_news)
