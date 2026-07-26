@@ -1,4 +1,5 @@
 feedparser
-gTTS
+gtts
 pydub
 requests
+pytz
