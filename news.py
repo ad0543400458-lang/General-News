@@ -436,3 +436,8 @@ for folder, category in categories.items():
 
 # שמירת היסטוריית הכתבות בסוף הריצה
 save_history(old_news)
+
+import time
+
+while True:
+    time.sleep(60)
