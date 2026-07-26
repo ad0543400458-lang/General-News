@@ -1,7 +1,7 @@
 import feedparser
 import os
 import requests
-from gTTS import gTTS
+from gtts import gTTS
 from pydub import AudioSegment
 import json
 import re
