@@ -3,4 +3,3 @@ gtts
 pydub
 requests
 pytz
-audioop-lts
