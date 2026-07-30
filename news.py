@@ -29,7 +29,6 @@ def load_history():
 def save_history(history_list):
     """שמירת ההיסטוריה לקובץ JSON"""
     try:
-        # שומרים את 5000 הפריטים האחרונים למניעת חזרות לאורך זמן
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(history_list[-5000:], f, ensure_ascii=False, indent=2)
     except Exception as e:
@@ -57,10 +56,8 @@ JOURNALISTS_MAP = {
 }
 
 # ===========================
-# חלוקת מקורות לפי קטגוריות
+# מאגר מקורות כללי
 # ===========================
-
-# 1. חדשות כלליות, מבזקים ועיתונאים (ללא כלכלה ותחבורה)
 sources_general = [
     "https://news.google.com/rss/search?q=חדשות+היום&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=חדשות+בארץ&hl=he&gl=IL&ceid=IL:he",
@@ -102,20 +99,52 @@ sources_general = [
     "https://news.google.com/rss/search?q=מבזקי+חדשות+בזמן+אמת&hl=he&gl=IL&ceid=IL:he"
 ]
 
-# 2. כלכלה ונדל"ן (שלוחה 3 בלבד)
+# ===========================
+# מקורות מקומיים
+# ===========================
+sources_local = [
+    "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+חדשות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=בית+שמש+נדלן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמה+ג+בית+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=קריית+גת+חרדית&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=חדשות+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=עיריית+ירושלים+שכונות&hl=he&gl=IL&ceid=IL:he"
+]
+
+# ===========================
+# מקורות כלכלה ונדל"ן
+# ===========================
 sources_economy = [
+    "https://www.ice.co.il/rss.xml",           
+    "https://www.bizportal.co.il/rss/bizportalrss.xml", 
     "https://news.google.com/rss/search?q=כלכלה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=מחירי+דירות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=נדלן&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=משכנתאות&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
-    "https://www.ice.co.il/rss.xml",           
-    "https://www.bizportal.co.il/rss/bizportalrss.xml", 
     "https://news.google.com/rss/search?q=מחירי+הדיור+או+שוק+הנדלן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=בנק+ישראל+ריבית+משכנתא&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ריבית+בנק+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=שוק+הדיור&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירידת+מחירי+הדירות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=הגרלות+דירה+בהנחה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=משרד+הבינוי+והשיכון&hl=he&gl=IL&ceid=IL:he"
 ]
 
-# 3. תחבורה וכבישים (שלוחה 4 בלבד)
+# ===========================
+# מקורות תחבורה וכבישים
+# ===========================
 sources_transport = [
     "https://news.google.com/rss/search?q=תחבורה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=כבישים&hl=he&gl=IL&ceid=IL:he",
@@ -125,33 +154,19 @@ sources_transport = [
     "https://news.google.com/rss/search?q=שינויים+בתחבורה+הציבורית&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רכבת+ישראל+לוח+זמנים+או+קווים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=משרד+התחבורה+כבישים+חדשים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=הרכבת+הקלה+בירושלים+או+בגוש+דן&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=משרד+התחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=נתיבי+ישראל&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=חסימת+כביש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=פקק+תנועה&hl=he&gl=IL&ceid=IL:he"
 ]
 
-# 4. מקורות מקומיים (שלוחה 2)
-sources_local = [
-    "https://news.google.com/rss/search?q=בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=עיריית+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בית+שמש+חדשות&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=בית+שמש+נדלן&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמה+ד+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=ארחות+תורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=ישיבת+אורחות+תורה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he"
-]
-
-# מילות מפתח לשלוחות
+# ===========================
+# מילות מפתח לסיווג הכתבות
+# ===========================
 keywords_folder_2 = [
     "בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג",
-    "אורחות תורה", "ארחות תורה", "טבריה", "טבריא", "שיכון ד", "רמת שלמה"
+    "טבריה", "טבריא", "שיכון ד", "רמת שלמה", "קריית גת"
 ]
 
 keywords_folder_3 = [
@@ -166,26 +181,30 @@ keywords_folder_4 = [
     "פקק", "פקקים", "עומס תנועה", "עומסי תנועה", "חסימה", "חסימות", "משרד התחבורה"
 ]
 
+# שלוחה 1 אוספת את כל המקורות עבור סיכום החדשות היומי
 categories = {
     "1": {
-        "sources": sources_general,
-        "keywords": []  # שלוחה 1: מקבלת את כל המבזקים הכלליים
+        "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
+        "keywords": [],
+        "max_age_seconds": 86400  # 24 שעות אחרונות לסיכום היומי
     },
     "2": {
         "sources": sources_general + sources_local,
-        "keywords": keywords_folder_2
+        "keywords": keywords_folder_2,
+        "max_age_seconds": 14400
     },
     "3": {
-        "sources": sources_economy,
-        "keywords": keywords_folder_3
+        "sources": sources_general + sources_economy,
+        "keywords": keywords_folder_3,
+        "max_age_seconds": 14400
     },
     "4": {
-        "sources": sources_transport,
-        "keywords": keywords_folder_4
+        "sources": sources_general + sources_transport,
+        "keywords": keywords_folder_4,
+        "max_age_seconds": 14400
     }
 }
 
-# טעינת היסטוריה מקובץ JSON
 old_news = load_history()
 old_news_set = set(old_news)
 
@@ -195,20 +214,20 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 def clean_text_for_tts(text):
     """מנקה סימני פיסוק מיותרים ומקפים שגורמים לעצירות מיותרות בהקראה"""
-    text = re.sub(r'[\"\']', '', text)               # הסרת מרכאות ובגרים
-    text = re.sub(r'[\-–—]', ' ', text)              # המרת מקפים לרווח
-    text = re.sub(r'[,;:]', ' ', text)               # הסרת פסיקים ונקודתיים שקוטעים משפט
-    text = re.sub(r'[\(\)\[\]\{\}]', '', text)       # הסרת סוגריים
-    text = re.sub(r'\s+', ' ', text).strip()         # ניקוי רווחים כפולים
+    text = re.sub(r'[\"\']', '', text)
+    text = re.sub(r'[\-–—]', ' ', text)
+    text = re.sub(r'[,;:]', ' ', text)
+    text = re.sub(r'[\(\)\[\]\{\}]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 for folder, category in categories.items():
     raw_items = []
     seen = set()
     keywords = category.get("keywords", [])
+    max_age = category.get("max_age_seconds", 14400)
 
     for source in category["sources"]:
-        # זיהוי עיתונאי לפי מנוע החיפוש בפיד
         journalist_name = None
         for key, name in JOURNALISTS_MAP.items():
             if key in source:
@@ -231,19 +250,15 @@ for folder, category in categories.items():
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
-            # חלון זמן של חצי שעה בלבד (1800 שניות)
-            if age_seconds > 1800 or age_seconds < -300:
+            if age_seconds > max_age or age_seconds < -300:
                 continue
 
             if israel_time > now_il:
                 israel_time = now_il
 
             original_title = item.title.strip()
-
-            # בדיקה האם הידיעה היא בנושא מזג אוויר/תחזית
             is_weather = "תחזית" in original_title or "מזג אוויר" in original_title
 
-            # הסרת שם האתר מסוף הכותרת בגוגל ניוז
             clean_title = re.sub(r'\s*-\s*[^\-]+\s*$', '', original_title)
             clean_title = re.sub(r'<.*?>', '', clean_title)
             clean_title = re.sub(r'[A-Za-z]+', '', clean_title)
@@ -273,11 +288,9 @@ for folder, category in categories.items():
             if "תחזית" in summary or "מזג אוויר" in summary:
                 is_weather = True
 
-            # טיפול במזג אוויר - הבאת הכתבה במלואה
             if is_weather:
                 news_content = f"{clean_title}. {summary}"
             else:
-                # ניקוי רגיל לכתבות
                 clean_title_fmt = clean_text_for_tts(clean_title)
                 clean_summary_fmt = clean_text_for_tts(summary)
 
@@ -298,24 +311,19 @@ for folder, category in categories.items():
             if not news_content or len(news_content) < 10:
                 continue
 
-            # אם זו כתבת עיתונאי - הוספת שמו במידה ולא מוזכר בתחילת הכתבה
             if journalist_name and not news_content.startswith(journalist_name):
                 news_content = f"{journalist_name} מדווח: {news_content}"
 
-            # סינון לפי מילות מפתח בשלוחות 2, 3, 4
-            if folder != "1" and keywords:
+            # סינון לפי מילות מפתח בשלוחות הנגדיות
+            if keywords:
                 found_keyword = any(kw in news_content or kw in clean_title for kw in keywords)
                 if not found_keyword:
                     continue
 
-            # ===========================
-            # מנגנון זיהוי כפילויות היקפי (Hash-Based)
-            # ===========================
             hebrew_words = re.findall(r'[\u0590-\u05FF]+', news_content)
             if len(hebrew_words) < 3:
                 continue
 
-            # יצירת טביעת אצבע ייחודית מהקישור ומתחילת הכתבה
             unique_str = f"{folder}_{link}_{''.join(hebrew_words[:8])}"
             fingerprint = hashlib.md5(unique_str.encode('utf-8')).hexdigest()
 
@@ -334,14 +342,14 @@ for folder, category in categories.items():
     if not raw_items:
         continue
 
-    # מיון לפי זמן הידיעה מהישן לחדש
     raw_items.sort(key=lambda x: x["time_obj"])
 
-    # ===========================
-    # עיבוד הזמנים ובניית הטקסט
-    # ===========================
     items = []
     last_assigned_time = None
+
+    # פתיח מיוחד לשלוחה 1 (מהדורת סיכום חדשות היום)
+    if folder == "1":
+        items.append("סיכום חדשות היום.")
 
     for item in raw_items:
         item_time = item["time_obj"]
@@ -365,79 +373,63 @@ for folder, category in categories.items():
         news_text = f"{str_time}. {item['news_content']}"
         items.append(news_text)
 
-    # ===========================
-    # יצירת הקבצים והמרת שמע
-    # ===========================
-    if folder in ["1", "2", "3", "4"]:
-        for index, news in enumerate(items):
-            tts = gTTS(news.strip(), lang="iw")
+    # סיום מיוחד לשלוחה 1
+    if folder == "1":
+        items.append("עד כאן החדשות ליום זה.")
 
-            mp3_name = f"news_{folder}_{index}.mp3"
-            wav_name = f"news_{folder}_{index}.wav"
+    # יצירת קבצי השמע
+    for index, news in enumerate(items):
+        tts = gTTS(news.strip(), lang="iw")
 
-            tts.save(mp3_name)
+        mp3_name = f"news_{folder}_{index}.mp3"
+        wav_name = f"news_{folder}_{index}.wav"
 
-            audio = AudioSegment.from_mp3(mp3_name)
-            audio = audio.speedup(playback_speed=1.25)
-            audio = audio.set_frame_rate(8000)
-            audio = audio.set_channels(1)
-            audio.export(wav_name, format="wav")
+        tts.save(mp3_name)
 
-    # ===========================
+        audio = AudioSegment.from_mp3(mp3_name)
+        audio = audio.speedup(playback_speed=1.25)
+        audio = audio.set_frame_rate(8000)
+        audio = audio.set_channels(1)
+        audio.export(wav_name, format="wav")
+
     # העלאה לימות המשיח
-    # ===========================
     token = os.environ.get("YEMOT_TOKEN", "")
     url = "https://www.call2all.co.il/ym/api/UploadFile"
+    list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
 
-    if folder in ["1", "2", "3", "4"]:
-        list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
-        list_data = {
-            "token": token,
-            "path": f"ivr2:/{folder}/"
-        }
+    try:
+        result = requests.post(list_url, data={"token": token, "path": f"ivr2:/{folder}/"}).json()
+    except Exception as e:
+        print(f"Error fetching directory info: {e}")
+        result = {}
+
+    max_number = 0
+    if "files" in result:
+        for file in result.get("files", []):
+            name = file.get("name", "")
+            number = re.findall(r'\d+', name)
+            if number:
+                max_number = max(max_number, int(number[0]))
+
+    for index, wav_name in enumerate([f"news_{folder}_{i}.wav" for i in range(len(items))], start=1):
+        new_number = str(max_number + index).zfill(3)
 
         try:
-            result = requests.post(list_url, data=list_data).json()
+            with open(wav_name, "rb") as f:
+                files = {"file": f}
+                data = {
+                    "token": token,
+                    "path": f"ivr2:/{folder}/{new_number}.wav",
+                    "convertAudio": "1"
+                }
+                response = requests.post(url, files=files, data=data)
+                print(folder, new_number, response.text)
         except Exception as e:
-            print(f"Error fetching directory info: {e}")
-            result = {}
+            print(f"Error uploading file {wav_name}: {e}")
 
-        max_number = 0
-
-        if "files" in result:
-            for file in result.get("files", []):
-                name = file.get("name", "")
-                number = re.findall(r'\d+', name)
-                if number:
-                    max_number = max(max_number, int(number[0]))
-
-        for index, wav_name in enumerate(
-            [f"news_{folder}_{i}.wav" for i in range(len(items))],
-            start=1
-        ):
-            new_number = str(max_number + index).zfill(3)
-
-            try:
-                with open(wav_name, "rb") as f:
-                    files = {"file": f}
-                    data = {
-                        "token": token,
-                        "path": f"ivr2:/{folder}/{new_number}.wav",
-                        "convertAudio": "1"
-                    }
-                    response = requests.post(url, files=files, data=data)
-                    print(folder, new_number, response.text)
-            except Exception as e:
-                print(f"Error uploading file {wav_name}: {e}")
-
-            mp3_name = wav_name.replace(".wav", ".mp3")
-            if os.path.exists(wav_name): os.remove(wav_name)
-            if os.path.exists(mp3_name): os.remove(mp3_name)
+        mp3_name = wav_name.replace(".wav", ".mp3")
+        if os.path.exists(wav_name): os.remove(wav_name)
+        if os.path.exists(mp3_name): os.remove(mp3_name)
 
 # שמירת היסטוריית הכתבות בסוף הריצה
 save_history(old_news)
-
-import time
-
-while True:
-    time.sleep(60)
