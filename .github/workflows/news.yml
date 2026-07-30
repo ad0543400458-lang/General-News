@@ -3,7 +3,7 @@ name: יצירת חדשות
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *" # הרצה פעם בשעה בלבד
+    - cron: "0 */3 * * *" # הרצה פעם ב-3 שעות
 
 jobs:
   news:
@@ -13,22 +13,26 @@ jobs:
       - name: הורדת הקבצים
         uses: actions/checkout@v4
 
+      - name: הגדרת פייתון
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: התקנת ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: התקנת כלים
+      - name: התקנת ספריות
         run: pip install -r requirements.txt
 
-      - name: יצירת החדשות
+      - name: הרצת תסריט החדשות
         run: python news.py
         env:
           YEMOT_TOKEN: ${{ secrets.YEMOT_TOKEN }}
 
-      - name: שמירת קבצי החדשות
-        uses: actions/upload-artifact@v4
-        with:
-          name: news-file
-          path: |
-            news.txt
-            news.mp3
-            001.wav
+      - name: שמירת היסטוריית כתבות בחזרה לרפוזיטורי
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add seen_news.json
+          git commit -m "Update seen news history [skip ci]" || exit 0
+          git push
