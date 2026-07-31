@@ -188,7 +188,7 @@ categories = {
     "1": {
         "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
         "keywords": [],
-        "max_age_seconds": 3600  # שעה אחת בלבד (3600 שניות)
+        "max_age_seconds": 3600  # שעה אחת בלבד
     },
     "2": {
         "sources": sources_general + sources_local,
@@ -215,7 +215,6 @@ now_il = datetime.now(TIMEZONE)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 def clean_text_for_tts(text):
-    """מנקה סימני פיסוק מיותרים ומקפים שגורמים לעצירות מיותרות בהקראה"""
     text = re.sub(r'[\"\']', '', text)
     text = re.sub(r'[\-–—]', ' ', text)
     text = re.sub(r'[,;:]', ' ', text)
@@ -227,7 +226,7 @@ for folder, category in categories.items():
     raw_items = []
     seen = set()
     keywords = category.get("keywords", [])
-    max_age = category.get("max_age_seconds", 14400)
+    max_age = category.get("max_age_seconds", 3600)
 
     for source in category["sources"]:
         journalist_name = None
@@ -248,7 +247,6 @@ for folder, category in categories.items():
                 israel_time = published.astimezone(TIMEZONE)
             else:
                 israel_time = now_il
-
             age_delta = now_il - israel_time
             age_seconds = age_delta.total_seconds()
 
