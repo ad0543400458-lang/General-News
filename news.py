@@ -347,9 +347,6 @@ for folder, category in categories.items():
     items = []
     last_assigned_time = None
 
-    # פתיח מיוחד לשלוחה 1 (מהדורת סיכום חדשות היום)
-    if folder == "1":
-        items.append("סיכום חדשות היום.")
 
     for item in raw_items:
         item_time = item["time_obj"]
