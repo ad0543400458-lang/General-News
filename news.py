@@ -181,27 +181,29 @@ keywords_folder_4 = [
     "פקק", "פקקים", "עומס תנועה", "עומסי תנועה", "חסימה", "חסימות", "משרד התחבורה"
 ]
 
-# שלוחה 1 אוספת את כל המקורות עבור סיכום החדשות היומי
+# ===========================
+# הגדרת זמני סינון (שעה אחת לכל השלוחות)
+# ===========================
 categories = {
     "1": {
         "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
         "keywords": [],
-        "max_age_seconds": 86400  # 24 שעות אחרונות לסיכום היומי
+        "max_age_seconds": 3600  # שעה אחת בלבד (3600 שניות)
     },
     "2": {
         "sources": sources_general + sources_local,
         "keywords": keywords_folder_2,
-        "max_age_seconds": 14400
+        "max_age_seconds": 3600  # שעה אחת בלבד
     },
     "3": {
         "sources": sources_general + sources_economy,
         "keywords": keywords_folder_3,
-        "max_age_seconds": 14400
+        "max_age_seconds": 3600  # שעה אחת בלבד
     },
     "4": {
         "sources": sources_general + sources_transport,
         "keywords": keywords_folder_4,
-        "max_age_seconds": 14400
+        "max_age_seconds": 3600  # שעה אחת בלבד
     }
 }
 
