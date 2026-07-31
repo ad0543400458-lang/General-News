@@ -218,6 +218,10 @@ def clean_text_for_tts(text):
     text = re.sub(r'[\-–—]', ' ', text)
     text = re.sub(r'[,;:]', ' ', text)
     text = re.sub(r'[\(\)\[\]\{\}]', '', text)
+    
+    # אם המילה "וגם" מופיעה פעמיים ברצף (עם רווחים או פיסוק ביניהן), מוחק את שתיהן
+    text = re.sub(r'\bוגם\s+וגם\b', '', text)
+    
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
