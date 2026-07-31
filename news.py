@@ -373,9 +373,6 @@ for folder, category in categories.items():
         news_text = f"{str_time}. {item['news_content']}"
         items.append(news_text)
 
-    # סיום מיוחד לשלוחה 1
-    if folder == "1":
-        items.append("עד כאן החדשות ליום זה.")
 
     # יצירת קבצי השמע
     for index, news in enumerate(items):
