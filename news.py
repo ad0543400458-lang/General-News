@@ -112,10 +112,8 @@ sources_local = [
     "https://news.google.com/rss/search?q=רמה+ה+בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמה+ג+בית+שמש&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=קריית+גת+חרדית&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=שיכון+ד+טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=עיריית+טבריה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=חדשות+טבריה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22שיכון+ד+טבריה%22&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22שכון+ד+טבריה%22&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
@@ -162,11 +160,24 @@ sources_transport = [
 ]
 
 # ===========================
+# מקורות מזג אוויר
+# ===========================
+sources_weather = [
+    "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=תחזית+מזג+האוויר&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=תחזית+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מעלות+חום+גשם+שלג&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=השירות+המטאורולוגי&hl=he&gl=IL&ceid=IL:he"
+]
+
+# ===========================
 # מילות מפתח לסיווג הכתבות
 # ===========================
 keywords_folder_2 = [
     "בית שמש", "רמת בית שמש", "רמה ד", "רמה ה", "רמה ג",
-    "טבריה", "טבריא", "שיכון ד", "רמת שלמה", "קריית גת"
+    "שיכון ד טבריה", "שכון ד טבריה", "שיכון ד, טבריה", "שכון ד, טבריה", 
+    "שיכון ד' טבריה", "שכון ד' טבריה", "שיכון ד", "שכון ד", "שכון ד'", "שיכון ד'",
+    "רמת שלמה", "קריית גת"
 ]
 
 keywords_folder_3 = [
@@ -178,7 +189,11 @@ keywords_folder_3 = [
 
 keywords_folder_4 = [
     "תחבורה", "כביש", "כבישים", "רכבת", "רכבת ישראל", "רכבת קלה",
-    "פקק", "פקקים", "עומס תנועה", "עומסי תנועה", "חסימה", "חסימות", "משרד התחבורה"
+    "פקק", "פקקים", "עומס תנועה", "עומסי תנועה", "חסימה", "חסימות", "משרד התחבורה", "תאונה"
+]
+
+keywords_folder_5 = [
+    "תחזית", "מזג אוויר", "מזג האוויר", "מעלות", "גשם", "שקע", "שרב", "עננות", "הטמפרטורות", "טמפרטורות"
 ]
 
 # שלוחה 1 אוספת את כל המקורות עבור סיכום החדשות היומי
@@ -202,6 +217,11 @@ categories = {
         "sources": sources_general + sources_transport,
         "keywords": keywords_folder_4,
         "max_age_seconds": 14400
+    },
+    "5": {
+        "sources": sources_weather + sources_general,
+        "keywords": keywords_folder_5,
+        "max_age_seconds": 43200  # 12 שעות עבור מזג אוויר
     }
 }
 
@@ -271,14 +291,10 @@ for folder, category in categories.items():
             is_short_source = any(domain in link for domain in SHORT_DOMAINS)
 
             summary = ""
-            if is_short_source:
-                if hasattr(item, "content"):
-                    summary = item.content[0].value.strip()
-                elif hasattr(item, "summary"):
-                    summary = item.summary.strip()
-            else:
-                if hasattr(item, "summary"):
-                    summary = item.summary.strip()
+            if hasattr(item, "content"):
+                summary = item.content[0].value.strip()
+            elif hasattr(item, "summary"):
+                summary = item.summary.strip()
 
             summary = re.sub(r'<.*?>', '', summary)
             summary = re.sub(
@@ -292,7 +308,15 @@ for folder, category in categories.items():
             if "תחזית" in summary or "מזג אוויר" in summary:
                 is_weather = True
 
-            if is_weather:
+            # בשלוחה 5 (מזג אוויר) מקריאים את הכל כולל הכל - גם כותרת וגם תוכן מלא
+            if folder == "5":
+                clean_title_fmt = clean_text_for_tts(clean_title)
+                clean_summary_fmt = clean_text_for_tts(summary)
+                if clean_summary_fmt and clean_summary_fmt not in clean_title_fmt:
+                    news_content = f"{clean_title_fmt}. {clean_summary_fmt}"
+                else:
+                    news_content = clean_title_fmt
+            elif is_weather:
                 news_content = f"{clean_title}. {summary}"
             else:
                 clean_title_fmt = clean_text_for_tts(clean_title)
@@ -351,7 +375,6 @@ for folder, category in categories.items():
     items = []
     last_assigned_time = None
 
-
     for item in raw_items:
         item_time = item["time_obj"]
 
@@ -373,7 +396,6 @@ for folder, category in categories.items():
 
         news_text = f"{str_time}. {item['news_content']}"
         items.append(news_text)
-
 
     # יצירת קבצי השמע
     for index, news in enumerate(items):
