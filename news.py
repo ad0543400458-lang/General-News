@@ -196,7 +196,6 @@ keywords_folder_5 = [
     "תחזית", "מזג אוויר", "מזג האוויר", "מעלות", "גשם", "שקע", "שרב", "עננות", "הטמפרטורות", "טמפרטורות"
 ]
 
-# שלוחה 1 אוספת את כל המקורות עבור סיכום החדשות היומי
 categories = {
     "1": {
         "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
@@ -281,14 +280,12 @@ for folder, category in categories.items():
                 israel_time = now_il
 
             original_title = item.title.strip()
-            is_weather = "תחזית" in original_title or "מזג אוויר" in original_title
 
             clean_title = re.sub(r'\s*-\s*[^\-]+\s*$', '', original_title)
             clean_title = re.sub(r'<.*?>', '', clean_title)
             clean_title = re.sub(r'[A-Za-z]+', '', clean_title)
 
             link = getattr(item, "link", "")
-            is_short_source = any(domain in link for domain in SHORT_DOMAINS)
 
             summary = ""
             if hasattr(item, "content"):
@@ -305,33 +302,19 @@ for folder, category in categories.items():
             )
             summary = re.sub(r'[A-Za-z]+', '', summary)
 
-            if "תחזית" in summary or "מזג אוויר" in summary:
-                is_weather = True
+            clean_title_fmt = clean_text_for_tts(clean_title)
+            clean_summary_fmt = clean_text_for_tts(summary)
 
-            # בשלוחה 5 (מזג אוויר) מקריאים את הכל כולל הכל - גם כותרת וגם תוכן מלא
-            if folder == "5":
-                clean_title_fmt = clean_text_for_tts(clean_title)
-                clean_summary_fmt = clean_text_for_tts(summary)
-                if clean_summary_fmt and clean_summary_fmt not in clean_title_fmt:
-                    news_content = f"{clean_title_fmt}. {clean_summary_fmt}"
-                else:
-                    news_content = clean_title_fmt
-            elif is_weather:
-                news_content = f"{clean_title}. {summary}"
+            title_compare = re.sub(r'\s+', '', clean_title_fmt)
+            summary_compare = re.sub(r'\s+', '', clean_summary_fmt)
+
+            if summary_compare.startswith(title_compare):
+                clean_summary_fmt = clean_summary_fmt[len(clean_title_fmt):].strip()
+
+            if not clean_summary_fmt or len(clean_summary_fmt) < 15:
+                news_content = clean_title_fmt
             else:
-                clean_title_fmt = clean_text_for_tts(clean_title)
-                clean_summary_fmt = clean_text_for_tts(summary)
-
-                title_compare = re.sub(r'\s+', '', clean_title_fmt)
-                summary_compare = re.sub(r'\s+', '', clean_summary_fmt)
-
-                if summary_compare.startswith(title_compare):
-                    clean_summary_fmt = clean_summary_fmt[len(clean_title_fmt):].strip()
-
-                if not clean_summary_fmt or len(clean_summary_fmt) < 15:
-                    news_content = clean_title_fmt
-                else:
-                    news_content = clean_summary_fmt
+                news_content = clean_summary_fmt
 
             news_content = re.sub(r'\bחדשות\b', '', news_content).strip()
             news_content = clean_text_for_tts(news_content)
@@ -383,18 +366,23 @@ for folder, category in categories.items():
 
         last_assigned_time = item_time
 
-        display_hour = item_time.hour % 12
-        if display_hour == 0:
-            display_hour = 12
+        # השעה מתווספת רק עבור שלוחה 1
+        if folder == "1":
+            display_hour = item_time.hour % 12
+            if display_hour == 0:
+                display_hour = 12
 
-        if item_time.minute == 0:
-            str_time = f"השעה {display_hour}"
-        elif item_time.minute == 1:
-            str_time = f"{display_hour} ודקה"
+            if item_time.minute == 0:
+                str_time = f"השעה {display_hour}"
+            elif item_time.minute == 1:
+                str_time = f"{display_hour} ודקה"
+            else:
+                str_time = f"{display_hour} ו-{item_time.minute} דקות"
+
+            news_text = f"{str_time}. {item['news_content']}"
         else:
-            str_time = f"{display_hour} ו-{item_time.minute} דקות"
+            news_text = item['news_content']
 
-        news_text = f"{str_time}. {item['news_content']}"
         items.append(news_text)
 
     # יצירת קבצי השמע
