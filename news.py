@@ -200,27 +200,27 @@ categories = {
     "1": {
         "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
         "keywords": [],
-        "max_age_seconds": 86400  # 24 שעות אחרונות לסיכום היומי
+        "max_age_seconds": 21600  # 24 שעות אחרונות לסיכום היומי
     },
     "2": {
         "sources": sources_general + sources_local,
         "keywords": keywords_folder_2,
-        "max_age_seconds": 14400
+        "max_age_seconds": 21600
     },
     "3": {
         "sources": sources_general + sources_economy,
         "keywords": keywords_folder_3,
-        "max_age_seconds": 14400
+        "max_age_seconds": 21600
     },
     "4": {
         "sources": sources_general + sources_transport,
         "keywords": keywords_folder_4,
-        "max_age_seconds": 14400
+        "max_age_seconds": 21600
     },
     "5": {
         "sources": sources_weather + sources_general,
         "keywords": keywords_folder_5,
-        "max_age_seconds": 43200  # 12 שעות עבור מזג אוויר
+        "max_age_seconds": 21600  # 12 שעות עבור מזג אוויר
     }
 }
 
