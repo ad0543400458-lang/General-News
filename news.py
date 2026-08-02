@@ -200,7 +200,7 @@ categories = {
     "1": {
         "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
         "keywords": [],
-        "max_age_seconds": 21600  # 24 שעות אחרונות לסיכום היומי
+        "max_age_seconds": 21600  # 6 שעות
     },
     "2": {
         "sources": sources_general + sources_local,
@@ -220,7 +220,7 @@ categories = {
     "5": {
         "sources": sources_weather + sources_general,
         "keywords": keywords_folder_5,
-        "max_age_seconds": 21600  # 12 שעות עבור מזג אוויר
+        "max_age_seconds": 21600
     }
 }
 
@@ -250,7 +250,7 @@ for folder, category in categories.items():
     raw_items = []
     seen = set()
     keywords = category.get("keywords", [])
-    max_age = category.get("max_age_seconds", 14400)
+    max_age = category.get("max_age_seconds", 21600)
 
     for source in category["sources"]:
         journalist_name = None
@@ -358,53 +358,25 @@ for folder, category in categories.items():
     raw_items.sort(key=lambda x: x["time_obj"])
 
     items = []
-    last_assigned_time = None
-
     for item in raw_items:
-        item_time = item["time_obj"]
+        items.append(item['news_content'])
 
-        if last_assigned_time and item_time <= last_assigned_time:
-            item_time = last_assigned_time + timedelta(minutes=1)
+    # בניית הטקסט הרציף למהדורה השלמה (פתיח + כל המבזקים + סגיר)
+    full_edition_text = "מהדורת החדשות האחרונה. " + " ".join(items) + " עד כאן המהדורה."
 
-        last_assigned_time = item_time
+    # יצירת קובץ השמע היחיד למהדורה
+    tts = gTTS(full_edition_text.strip(), lang="iw")
 
-        # השעה מתווספת רק עבור שלוחה 1
-        if folder == "1":
-            display_hour = item_time.hour % 12
-            if display_hour == 0:
-                display_hour = 12
+    mp3_name = f"news_{folder}.mp3"
+    wav_name = f"news_{folder}.wav"
 
-            if item_time.minute == 0:
-                str_time = f"השעה {display_hour}"
-            elif item_time.minute == 1:
-                str_time = f"{display_hour} ודקה"
-            else:
-                str_time = f"{display_hour} ו-{item_time.minute} דקות"
+    tts.save(mp3_name)
 
-            news_text = f"{str_time}. {item['news_content']}"
-        else:
-            news_text = item['news_content']
-
-        items.append(news_text)
-        
-        if items:
-            items.insert(0, "מהדורת החדשות האחרונה.")
-
-
-    # יצירת קבצי השמע
-    for index, news in enumerate(items):
-        tts = gTTS(news.strip(), lang="iw")
-
-        mp3_name = f"news_{folder}_{index}.mp3"
-        wav_name = f"news_{folder}_{index}.wav"
-
-        tts.save(mp3_name)
-
-        audio = AudioSegment.from_mp3(mp3_name)
-        audio = audio.speedup(playback_speed=1.25)
-        audio = audio.set_frame_rate(8000)
-        audio = audio.set_channels(1)
-        audio.export(wav_name, format="wav")
+    audio = AudioSegment.from_mp3(mp3_name)
+    audio = audio.speedup(playback_speed=1.25)
+    audio = audio.set_frame_rate(8000)
+    audio = audio.set_channels(1)
+    audio.export(wav_name, format="wav")
 
     # העלאה לימות המשיח
     token = os.environ.get("YEMOT_TOKEN", "")
@@ -425,25 +397,23 @@ for folder, category in categories.items():
             if number:
                 max_number = max(max_number, int(number[0]))
 
-    for index, wav_name in enumerate([f"news_{folder}_{i}.wav" for i in range(len(items))], start=1):
-        new_number = str(max_number + index).zfill(3)
+    new_number = str(max_number + 1).zfill(3)
 
-        try:
-            with open(wav_name, "rb") as f:
-                files = {"file": f}
-                data = {
-                    "token": token,
-                    "path": f"ivr2:/{folder}/{new_number}.wav",
-                    "convertAudio": "1"
-                }
-                response = requests.post(url, files=files, data=data)
-                print(folder, new_number, response.text)
-        except Exception as e:
-            print(f"Error uploading file {wav_name}: {e}")
+    try:
+        with open(wav_name, "rb") as f:
+            files = {"file": f}
+            data = {
+                "token": token,
+                "path": f"ivr2:/{folder}/{new_number}.wav",
+                "convertAudio": "1"
+            }
+            response = requests.post(url, files=files, data=data)
+            print(folder, new_number, response.text)
+    except Exception as e:
+        print(f"Error uploading file {wav_name}: {e}")
 
-        mp3_name = wav_name.replace(".wav", ".mp3")
-        if os.path.exists(wav_name): os.remove(wav_name)
-        if os.path.exists(mp3_name): os.remove(mp3_name)
+    if os.path.exists(wav_name): os.remove(wav_name)
+    if os.path.exists(mp3_name): os.remove(mp3_name)
 
 # שמירת היסטוריית הכתבות בסוף הריצה
 save_history(old_news)
