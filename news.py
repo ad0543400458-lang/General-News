@@ -362,7 +362,7 @@ for folder, category in categories.items():
         items.append(item['news_content'])
 
     # בניית הטקסט הרציף למהדורה השלמה (פתיח + כל המבזקים + סגיר)
-    full_edition_text = "מהדורת החדשות האחרונה. " + " ".join(items) + " עד כאן המהדורה."
+  full_edition_text = "מהדורת החדשות של השעות האחרונות. " + " ".join(items) + " עד כאן מהדורת החדשות."
 
     # יצירת קובץ השמע היחיד למהדורה
     tts = gTTS(full_edition_text.strip(), lang="iw")
