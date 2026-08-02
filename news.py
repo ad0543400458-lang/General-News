@@ -227,6 +227,8 @@ categories = {
 old_news = load_history()
 old_news_set = set(old_news)
 
+EDITION_HOURS = 6
+
 SHORT_DOMAINS = ["maariv.co.il", "walla.co.il"]
 now_il = datetime.now(TIMEZONE)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
@@ -384,6 +386,10 @@ for folder, category in categories.items():
             news_text = item['news_content']
 
         items.append(news_text)
+        
+        if items:
+            items.insert(0, "מהדורת החדשות האחרונה.")
+
 
     # יצירת קבצי השמע
     for index, news in enumerate(items):
