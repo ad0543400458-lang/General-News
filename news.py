@@ -372,7 +372,9 @@ for folder, category in categories.items():
         print("AI editing completed")
     except Exception as e:
         print("AI failed, using original text:", e)
-        
+    print(f"AI text length: {len(full_edition_text)}")
+
+    print(full_edition_text[:500])     
     tts = gTTS(full_edition_text.strip(), lang="iw")
 
     mp3_name = f"news_{folder}.mp3"
