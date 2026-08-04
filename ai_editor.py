@@ -41,7 +41,7 @@ def edit_news_with_ai(news_text):
 """
 
     response = client.chat.completions.create(
-        model="qwen/qwen-2.5-72b-instruct:free",
+        model="openrouter/free"
         messages=[
             {
                 "role": "user",
