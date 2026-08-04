@@ -3,3 +3,4 @@ gtts
 pydub
 requests
 pytz
+openai
