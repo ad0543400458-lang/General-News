@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 
-def edit_news_with_ai(news_text):
+def edit_news_with_ai(news_text, folder):
     """
     מקבל חדשות גולמיות ומחזיר טקסט ערוך למהדורת חדשות
     """
