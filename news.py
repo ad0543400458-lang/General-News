@@ -7,6 +7,7 @@ import json
 import re
 import hashlib
 from datetime import datetime, timezone, timedelta
+from ai_editor import edit_news_with_ai
 import pytz
 
 # ===========================
@@ -365,6 +366,13 @@ for folder, category in categories.items():
     full_edition_text = "מהדורת החדשות של השעות האחרונות. " + ", ".join(items) + " עד כאן מהדורת החדשות."
 
     # יצירת קובץ השמע היחיד למהדורה
+
+    try:
+        full_edition_text = edit_news_with_ai(full_edition_text)
+        print("AI editing completed")
+    except Exception as e:
+        print("AI failed, using original text:", e)
+        
     tts = gTTS(full_edition_text.strip(), lang="iw")
 
     mp3_name = f"news_{folder}.mp3"
