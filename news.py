@@ -118,7 +118,9 @@ sources_local = [
     "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=עיריית+ירושלים+שכונות&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=עיריית+ירושלים+שכונות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=מיין+שמש&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=טבריה+חדשות&hl=he&gl=IL&ceid=IL:he"
 ]
 
 # ===========================
@@ -238,7 +240,114 @@ def clean_text_for_tts(text):
     """מנקה סימני פיסוק מיותרים ומקפים שגורמים לעצירות מיותרות בהקראה"""
     text = re.sub(r'[\"\']', '', text)
     text = re.sub(r'[\-–—]', ' ', text)
-    text = re.sub(r'[,;:]', ' ', text)
+    return text
+
+def parse_date(entry):
+    """חילוץ תאריך פרסום מתוך ה-feed"""
+    if hasattr(entry, 'published_parsed') and entry.published_parsed:
+        return datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
+    elif hasattr(entry, 'updated_parsed') and entry.updated_parsed:
+        return datetime(*entry.updated_parsed[:6], tzinfo=timezone.utc)
+    return datetime.now(timezone.utc)
+
+def is_within_time_limit(entry_date, max_age_seconds):
+    """בדיקה האם הכתבה פורסמה בטווח הזמן המבוקש"""
+    now = datetime.now(timezone.utc)
+    age = (now - entry_date).total_seconds()
+    return age <= max_age_seconds
+
+def process_rss_feed(category_id, config):
+    """עיבוד מקורות ה-RSS עבור קטגוריה מסוימת"""
+    print(f"--- Processing Category {category_id} ---")
+    sources = config["sources"]
+    keywords = config["keywords"]
+    max_age_seconds = config["max_age_seconds"]
+    
+    new_articles = []
+    
+    for url in sources:
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries:
+                pub_date = parse_date(entry)
+                if not is_within_time_limit(pub_date, max_age_seconds):
+                    continue
+                
+                title = entry.title
+                link = entry.link
+                summary = getattr(entry, 'summary', '')
+                
+                # בדיקת מילות מפתח במידה והוגדרו
+                if keywords:
+                    combined_text = f"{title} {summary}"
+                    if not any(kw.lower() in combined_text.lower() for kw in keywords):
+                        continue
+                
+                # יצירת מזהה ייחודי לכתבה למניעת כפילויות
+                article_id = hashlib.md5(f"{title}{link}".encode('utf-8')).hexdigest()
+                
+                if article_id not in old_news_set:
+                    new_articles.append({
+                        "id": article_id,
+                        "title": title,
+                        "link": link,
+                        "summary": summary,
+                        "published": pub_date
+                    })
+                    old_news_set.add(article_id)
+                    old_news.append(article_id)
+        except Exception as e:
+            print(f"Error parsing feed {url}: {e}")
+            
+    print(f"Found {len(new_articles)} new articles for Category {category_id}")
+    return new_articles
+
+def generate_audio_for_category(category_id, articles):
+    """יצירת קובץ שמע לכתבות שנמצאו בקטגוריה"""
+    if not articles:
+        print(f"No new articles to generate audio for Category {category_id}")
+        return
+        
+    combined_text = ""
+    for idx, article in enumerate(articles, 1):
+        cleaned_title = clean_text_for_tts(article['title'])
+        combined_text += f"ידיעה מספר {idx}. {cleaned_title}. "
+        
+    try:
+        tts = gTTS(text=combined_text, lang='he')
+        temp_filename = f"temp_cat_{category_id}.mp3"
+        tts.save(temp_filename)
+        
+        # המרה או טיפול בשמע באמצעות pydub במידת הצורך
+        sound = AudioSegment.from_mp3(temp_filename)
+        output_filename = f"category_{category_id}_news.mp3"
+        sound.export(output_filename, format="mp3")
+        
+        if os.path.exists(temp_filename):
+            os.remove(temp_filename)
+            
+        print(f"Successfully generated {output_filename}")
+    except Exception as e:
+        print(f"Error generating audio for Category {category_id}: {e}")
+
+def main():
+    """ריצה ראשית על כל הקטגוריות ושמירת ההיסטוריה"""
+    for cat_id, config in categories.items():
+        articles = process_rss_feed(cat_id, config)
+        if articles:
+            # במידה וקיים שירות עריכה ב-AI
+            try:
+                articles = edit_news_with_ai(articles)
+            except Exception as e:
+                print(f"AI editing skipped or failed: {e}")
+                
+            generate_audio_for_category(cat_id, articles)
+            
+    save_history(old_news)
+    print("Execution completed.")
+
+if __name__ == "__main__":
+    main()    text = re.sub(r'[,;:]', ' ', text)
     text = re.sub(r'[\(\)\[\]\{\}]', '', text)
     
     # אם המילה "וגם" מופיעה פעמיים ברצף (עם רווחים או פיסוק ביניהן), מוחק את שתיהן
