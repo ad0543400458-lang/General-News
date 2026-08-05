@@ -368,7 +368,7 @@ for folder, category in categories.items():
     # יצירת קובץ השמע היחיד למהדורה
 
     try:
-        full_edition_text = edit_news_with_ai(full_edition_text, folder)
+        full_edition_text = edit_news_with_ai(full_edition_text, folder, current_hour=now_il.hour)
         print("AI editing completed")
     except Exception as e:
         print("AI failed, using original text:", e)
