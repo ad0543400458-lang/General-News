@@ -240,6 +240,7 @@ def clean_text_for_tts(text):
     """מנקה סימני פיסוק מיותרים ומקפים שגורמים לעצירות מיותרות בהקראה"""
     text = re.sub(r'[\"\']', '', text)
     text = re.sub(r'[\-–—]', ' ', text)
+    text = re.sub(r'[,;:]', ' ', text)
     return text
 
 def parse_date(entry):
