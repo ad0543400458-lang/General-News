@@ -358,15 +358,16 @@ def main():
 
         items = [item['news_content'] for item in raw_items]
 
-        # בניית הטקסט הרציף למהדורה השלמה (פתיח + כל המבזקים + סגיר)
-        full_edition_text = "מהדורת החדשות של השעות האחרונות. " + ", ".join(items) + " עד כאן מהדורת החדשות."
+        # חיבור הידיעות בלבד ללא פתיח וסגיר מראש
+        raw_news_text = ", ".join(items)
 
-        # עריכת הטקסט במידת הצורך
+        # עריכת הטקסט והוספת פתיח/סגיר מותאמים באמצעות AI
         try:
-            full_edition_text = edit_news_with_ai(full_edition_text, folder, current_hour=now_il.hour)
-            print("AI editing completed")
+            full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
+            print(f"AI editing completed for folder {folder}")
         except Exception as e:
-            print("AI failed, using original text:", e)
+            print("AI failed, using raw text:", e)
+            full_edition_text = raw_news_text
 
         print(f"AI text length: {len(full_edition_text)}")
         print(full_edition_text[:500])
