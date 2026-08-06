@@ -359,7 +359,7 @@ def main():
         items = [item['news_content'] for item in raw_items]
 
         # חיבור הידיעות בלבד ללא פתיח וסגיר מראש
-        raw_news_text = ", ".join(items)
+        raw_news_text = "\n---\n".join(items)
 
         # עריכת הטקסט והוספת פתיח/סגיר מותאמים באמצעות AI
         try:
