@@ -230,12 +230,13 @@ categories = {
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 def clean_text_for_tts(text):
-    """מנקה סימני פיסוק מיותרים ומקפים שגורמים לעצירות מיותרות בהקראה"""
+    """מנקה סימני פיסוק ותווים מיוחדים שעלולים להכשיל את ההקראה"""
+    text = re.sub(r'&+', ' ', text)
     text = re.sub(r'[\"\']', '', text)
     text = re.sub(r'[\-–—]', ' ', text)
     text = re.sub(r'[,;:]', ' ', text)
     text = re.sub(r'[\(\)\[\]\{\}]', '', text)
-    text = re.sub(r'\bוגם\s+וגם\b', '', text)
+    text = re.sub(r'[^\w\s\u0590-\u05FF.]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
