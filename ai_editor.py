@@ -152,7 +152,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 """
 
     response = client.chat.completions.create(
-        model="google/gemini-2.0-flash",
+        model="google/gemini-3.6-flash",
         messages=[
             {
                 "role": "system",
