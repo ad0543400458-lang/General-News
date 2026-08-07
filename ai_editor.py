@@ -130,14 +130,44 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 """
 
     user_prompt = f"""
-מספר השלוחה:
+מספר השלוחה: {folder}
 
-{folder}
+ערוך את הידיעות למהדורת חדשות מלאה לפי כל ההוראות.
+
+אם השלוחה היא 1:
+- התחל בפתיח שנדרש.
+- הוסף את כל הקטגוריות לפי הצורך.
+- לפני כל קבוצת ידיעות כתוב את שם הקטגוריה.
+- סיים במשפט הסיום שנדרש.
+
+אם השלוחה אינה 1:
+- אל תוסיף פתיח.
+- אל תוסיף סיום.
+- אבל חובה לכתוב את שם הקטגוריה לפני כל קבוצת ידיעות.
+- אסור להציג ידיעה לפני שם קטגוריה.
 
 הידיעות:
 
 {news_text}
 """
+
+    response = client.chat.completions.create(
+        model="google/gemini-2.0-flash",
+        messages=[
+            {
+                "role": "system",
+                "content": system_prompt,
+            },
+            {
+                "role": "user",
+                "content": user_prompt,
+            },
+        ],
+        temperature=0,
+        max_tokens=4000,
+    )
+
+    return response.choices[0].message.content.strip()
 
     response = client.chat.completions.create(
         model="google/gemini-2.0-flash",
