@@ -365,6 +365,9 @@ def main():
         try:
             full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
             print(f"AI editing completed for folder {folder}")
+            print("========== AI OUTPUT ==========")
+            print(full_edition_text)
+            print("================================")
         except Exception as e:
             print("AI failed, using raw text:", e)
             full_edition_text = raw_news_text
