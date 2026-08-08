@@ -57,13 +57,13 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
     try:
         response = client.chat.completions.create(
-            model="google/gemini-3.6-flash",  # שם מודל תקין ב-OpenRouter
+            model="meta-llama/llama-3.3-70b-instruct:free",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.2,
-            max_tokens=600,
+            max_tokens=4000,  # הועלה כדי למנוע קטיעה של המהדורה באמצע
         )
         return response.choices[0].message.content.strip()
 
