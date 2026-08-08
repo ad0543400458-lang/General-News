@@ -1,36 +1,38 @@
 import os
 from openai import OpenAI
 
-
 def edit_news_with_ai(news_text, folder, current_hour=None):
-    """
-    מקבל חדשות גולמיות ומחזיר טקסט ערוך למהדורת חדשות
-    """
+"""
+מקבל חדשות גולמיות ומחזיר טקסט ערוך למהדורת חדשות
+"""
 
-    api_key = os.environ.get("OPENROUTER_API_KEY")
+```
+api_key = os.environ.get("OPENROUTER_API_KEY")
 
-    if not api_key:
-        raise Exception("Missing OPENROUTER_API_KEY")
+if not api_key:
+    raise Exception("Missing OPENROUTER_API_KEY")
 
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=api_key,
+)
 
-    # פתיח מותאם לפי השעה
-    intro_text = "אתם מאזינים למהדורת החדשות."
+# פתיח מותאם לפי השעה
+intro_text = "אתם מאזינים למהדורת החדשות."
 
-    if current_hour is not None:
-        if 5 <= current_hour <= 8:
-            intro_text = "אתם מאזינים למהדורת שש בבוקר בחדשות המידע."
-        elif 11 <= current_hour <= 14:
-            intro_text = "אתם מאזינים למהדורת שתים עשרה בצהריים בחדשות המידע."
-        elif 17 <= current_hour <= 20:
-            intro_text = "אתם מאזינים למהדורת שש בערב בחדשות המידע."
-        elif current_hour >= 23 or current_hour <= 2:
-            intro_text = "אתם מאזינים למהדורת חצות בחדשות המידע."
+if current_hour is not None:
+    if 5 <= current_hour <= 8:
+        intro_text = "אתם מאזינים למהדורת שש בבוקר בחדשות המידע."
+    elif 11 <= current_hour <= 14:
+        intro_text = "אתם מאזינים למהדורת שתים עשרה בצהריים בחדשות המידע."
+    elif 17 <= current_hour <= 20:
+        intro_text = "אתם מאזינים למהדורת שש בערב בחדשות המידע."
+    elif current_hour >= 23 or current_hour <= 2:
+        intro_text = "אתם מאזינים למהדורת חצות בחדשות המידע."
 
-    system_prompt = f"""
+system_prompt = f"""
+```
+
 אתה עורך החדשות הראשי של תחנת רדיו.
 
 מטרתך להכין מהדורת חדשות מקצועית המיועדת לקריין.
@@ -47,9 +49,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
 5. אין לחזור על אותו אירוע.
 
-6. יש למיין את הידיעות לפי קטגוריות.
-
-סדר הקטגוריות:
+6. יש למיין את הידיעות לפי הקטגוריות הבאות ובסדר הבא:
 
 פוליטיקה וביטחון
 
@@ -66,9 +66,9 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 7. חובה לכתוב את שם הקטגוריה בצורה טבעית להקראה לפני כל קבוצת ידיעות.
 
 8. קטגוריית מזג האוויר תמיד תהיה אחרונה ותיקרא:
-"תחזית לסיום"
+   "תחזית לסיום"
 
-9. אין להציג אף ידיעה לפני שם קטגוריה.
+9. אין להציג אף ידיעה לפני שם הקטגוריה שלה.
 
 10. אין ליצור כותרות ריקות.
 
@@ -77,13 +77,12 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 12. אין להזכיר מקורות, אתרי חדשות או שמות כתבים אלא אם הם חלק מהידיעה עצמה.
 
 13. הסר מילים כגון:
-
-מבזק
-מבזק ראשון
-עדכון
-דיווח ראשוני
-פרסום ראשון
-מתעדכן
+    מבזק
+    מבזק ראשון
+    עדכון
+    דיווח ראשוני
+    פרסום ראשון
+    מתעדכן
 
 14. כתוב בשפה טבעית שמתאימה להקראה ברדיו.
 
@@ -97,119 +96,122 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
 19. אין ליצור רשימת מבזקים אלא מהדורת חדשות רציפה.
 
-20. אל תכתוב שום הסבר על ההוראות שקיבלת.
-החזר רק את מהדורת החדשות עצמה.
+20. אל תכתוב הסברים על ההוראות שקיבלת.
+    החזר רק את מהדורת החדשות עצמה.
 
-אם מספר השלוחה הוא 1 חובה להחזיר בדיוק את המבנה הבא:
+אם מספר השלוחה הוא 1:
+
+חובה להתחיל בדיוק כך:
 
 {intro_text}
 
 עיקרי החדשות מהשעות האחרונות.
 
-לאחר מכן כל הקטגוריות והידיעות.
+לאחר מכן הצג את הקטגוריות והידיעות.
 
-בסיום חובה לכתוב:
+חובה לסיים בדיוק כך:
 
 עד כאן מהדורת החדשות.
 
 תודה שהאזנתם ולהתראות במהדורה הבאה.
 
 אין להשמיט את הפתיח.
-
 אין להשמיט את הסיום.
-
 אין להשמיט את שמות הקטגוריות.
 
 אם מספר השלוחה אינו 1:
 
-אין פתיח.
-
-אין סיום.
+אין להוסיף פתיח.
+אין להוסיף סיום.
 
 אבל עדיין חובה לכתוב את שם הקטגוריה לפני כל קבוצת ידיעות.
 """
 
-    user_prompt = f"""
+```
+user_prompt = f"""
+```
+
 מספר השלוחה: {folder}
 
 ערוך את הידיעות למהדורת חדשות מלאה לפי כל ההוראות.
 
 אם השלוחה היא 1:
 
-- התחל בפתיח שנדרש.
-- הוסף את כל הקטגוריות שיש בהן ידיעות.
-- לפני כל קבוצת ידיעות כתוב את שם הקטגוריה.
-- תחזית מזג האוויר חייבת להיות בסוף תחת "תחזית לסיום".
-- סיים במשפט הסיום שנדרש.
+* התחל בפתיח שנדרש.
+* הצג רק קטגוריות שיש בהן ידיעות.
+* לפני כל קבוצת ידיעות כתוב את שם הקטגוריה.
+* תחזית מזג האוויר חייבת להיות בסוף תחת "תחזית לסיום".
+* סיים במשפט הסיום שנדרש.
 
 אם השלוחה אינה 1:
 
-- אל תוסיף פתיח.
-- אל תוסיף סיום.
-- אבל חובה לכתוב את שם הקטגוריה לפני כל קבוצת ידיעות.
-- אסור להציג ידיעה לפני שם קטגוריה.
+* אל תוסיף פתיח.
+* אל תוסיף סיום.
+* חובה לכתוב את שם הקטגוריה לפני כל קבוצת ידיעות.
+* אסור להציג ידיעה לפני שם הקטגוריה.
 
 הידיעות:
 
 {news_text}
 """
 
-    # ניסיון ראשון
-    try:
-        response = client.chat.completions.create(
-            model="google/gemini-3.6-flash",
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt,
-                },
-            ],
-            temperature=0,
-            max_tokens=1300,
-        )
+```
+# ניסיון ראשון
+try:
+    response = client.chat.completions.create(
+        model="google/gemini-3.6-flash",
+        messages=[
+            {
+                "role": "system",
+                "content": system_prompt,
+            },
+            {
+                "role": "user",
+                "content": user_prompt,
+            },
+        ],
+        temperature=0,
+        max_tokens=1300,
+    )
 
-        result = response.choices[0].message.content.strip()
+    result = response.choices[0].message.content.strip()
 
-        if result:
-            return result
+    if result:
+        return result
 
-    except Exception as e:
-        error_text = str(e)
+except Exception as e:
+    error_text = str(e)
 
-        # ניסיון שני במקרה של חוסר קרדיטים
-        if "402" in error_text or "credits" in error_text.lower():
-            print("Not enough credits for 1300 tokens, retrying with 1000 tokens...")
+    # ניסיון שני במקרה של חוסר קרדיטים
+    if "402" in error_text or "credits" in error_text.lower():
+        print("Not enough credits for 1300 tokens, retrying with 1000 tokens...")
 
-            try:
-                response = client.chat.completions.create(
-                    model="google/gemini-3.6-flash",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": system_prompt,
-                        },
-                        {
-                            "role": "user",
-                            "content": user_prompt,
-                        },
-                    ],
-                    temperature=0,
-                    max_tokens=1000,
-                )
+        try:
+            response = client.chat.completions.create(
+                model="google/gemini-3.6-flash",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt,
+                    },
+                ],
+                temperature=0,
+                max_tokens=1000,
+            )
 
-                result = response.choices[0].message.content.strip()
+            result = response.choices[0].message.content.strip()
 
-                if result:
-                    return result
+            if result:
+                return result
 
-            except Exception as retry_error:
-                raise retry_error
+        except Exception as retry_error:
+            raise retry_error
 
-        raise e
+    raise e
 
-    raise Exception("AI returned empty response")
+raise Exception("AI returned empty response")
 ```
