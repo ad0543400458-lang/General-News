@@ -176,7 +176,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
             },
         ],
         temperature=0,
-        max_tokens=4000,
+        max_tokens=2500,
     )
 
     return response.choices[0].message.content.strip()
