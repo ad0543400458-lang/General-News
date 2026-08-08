@@ -13,11 +13,9 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
         api_key=api_key,
     )
 
-    # אם לא הועברה שעה, קח את השעה הנוכחית במערכת
     if current_hour is None:
         current_hour = datetime.now().hour
 
-    # הגדרת פתיח לפי השעה
     intro_text = "אתם מאזינים למהדורת החדשות."
     if 5 <= current_hour <= 8:
         intro_text = "אתם מאזינים למהדורת שש בבוקר בחדשות המידע."
@@ -57,13 +55,13 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
     try:
         response = client.chat.completions.create(
-            model="meta-llama/llama-3.3-70b-instruct:free",
+            model="google/gemini-2.0-flash-exp:free",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.2,
-            max_tokens=4000,  # הועלה כדי למנוע קטיעה של המהדורה באמצע
+            max_tokens=1200,
         )
         return response.choices[0].message.content.strip()
 
