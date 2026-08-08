@@ -63,7 +63,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.2,
-            max_tokens=2500,
+            max_tokens=600,
         )
         return response.choices[0].message.content.strip()
 
