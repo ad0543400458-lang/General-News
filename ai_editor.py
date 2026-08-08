@@ -214,4 +214,3 @@ except Exception as e:
     raise e
 
 raise Exception("AI returned empty response")
-```
