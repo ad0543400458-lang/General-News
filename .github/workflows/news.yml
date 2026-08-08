@@ -30,7 +30,7 @@ jobs:
         run: python news.py
         env:
           YEMOT_TOKEN: ${{ secrets.YEMOT_TOKEN }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: שמירת היסטוריית כתבות בחזרה לרפוזיטורי
         run: |
