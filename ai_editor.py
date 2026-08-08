@@ -57,7 +57,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
     try:
         response = client.chat.completions.create(
-            model="google/gemini-2.0-flash-001",  # שם מודל תקין ב-OpenRouter
+            model="google/gemini-3.6-flash",  # שם מודל תקין ב-OpenRouter
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
