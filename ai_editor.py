@@ -120,7 +120,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 עד כאן מהדורת החדשות. תודה שהאזנתם ולהתראות במהדורה הבאה.
 """
 
-        prompt = f"{system_prompt}
+       prompt = f"""{system_prompt}
 
 טקסט הידיעות לעריכה:
 
