@@ -87,11 +87,21 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 """
 
     try:
+        # שימוש במודל יציב וזמין
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-1.5-flash",
             contents=[system_prompt, user_prompt],
         )
         return response.text.strip()
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
-        return news_text
+        print(f"Error calling Gemini API with gemini-1.5-flash: {e}")
+        try:
+            # ניסיון חלופי עם gemini-2.0-flash במידה ונתמך
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=[system_prompt, user_prompt],
+            )
+            return response.text.strip()
+        except Exception as e2:
+            print(f"Fallback model also failed: {e2}")
+            return news_text
