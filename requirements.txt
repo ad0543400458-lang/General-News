@@ -4,3 +4,4 @@ pydub
 requests
 pytz
 google-genai
+google-generativeai
