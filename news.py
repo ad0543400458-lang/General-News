@@ -203,7 +203,7 @@ categories = {
     "1": {
         "sources": list(set(sources_general + sources_local + sources_economy + sources_transport)),
         "keywords": [],
-        "max_age_seconds": 21600  # 6 שעות
+        "max_age_seconds": 3600  # 1 שעה
     },
     "2": {
         "sources": sources_general + sources_local,
