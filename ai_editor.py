@@ -63,7 +63,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
         prompt = f"{system_prompt}\n\nטקסט לעריכה:\n{news_text}"
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.5-flash",
             contents=prompt,
         )
         print("Successfully generated news using gemini-2.0-flash")
