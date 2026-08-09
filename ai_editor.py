@@ -2,45 +2,17 @@ import os
 from google import genai
 
 HOURS_HEBREW = {
-    0: "מהדורת חצות",
-    1: "מהדורת אחת בלילה",
-    2: "מהדורת שתים בלילה",
-    3: "מהדורת שלוש בלילה",
-    4: "מהדורת ארבע לפנות בוקר",
-    5: "מהדורת חמש בבוקר",
-    6: "מהדורת שש בבוקר",
-    7: "מהדורת שבע בבוקר",
-    8: "מהדורת שמונה בבוקר",
-    9: "מהדורת תשע בבוקר",
-    10: "מהדורת עשר בבוקר",
-    11: "מהדורת אחת עשרה בבוקר",
-    12: "מהדורת שתים עשרה בצהריים",
-    13: "מהדורת אחת בצהריים",
-    14: "מהדורת שתים בצהריים",
-    15: "מהדורת שלוש בצהריים",
-    16: "מהדורת ארבע אחר הצהריים",
-    17: "מהדורת חמש אחר הצהריים",
-    18: "מהדורת שש בערב",
-    19: "מהדורת שבע בערב",
-    20: "מהדורת שמונה בערב",
-    21: "מהדורת תשע בערב",
-    22: "מהדורת עשר בלילה",
-    23: "מהדורת אחת עשרה בלילה"
+    0: "מהדורת חצות", 1: "מהדורת אחת בלילה", 2: "מהדורת שתים בלילה",
+    3: "מהדורת שלוש בלילה", 4: "מהדורת ארבע לפנות בוקר", 5: "מהדורת חמש בבוקר",
+    6: "מהדורת שש בבוקר", 7: "מהדורת שבע בבוקר", 8: "מהדורת שמונה בבוקר",
+    9: "מהדורת תשע בבוקר", 10: "מהדורת עשר בבוקר", 11: "מהדורת אחת עשרה בבוקר",
+    12: "מהדורת שתים עשרה בצהריים", 13: "מהדורת אחת בצהריים", 14: "מהדורת שתים בצהריים",
+    15: "מהדורת שלוש בצהריים", 16: "מהדורת ארבע אחר הצהריים", 17: "מהדורת חמש אחר הצהריים",
+    18: "מהדורת שש בערב", 19: "מהדורת שבע בערב", 20: "מהדורת שמונה בערב",
+    21: "מהדורת תשע בערב", 22: "מהדורת עשר בלילה", 23: "מהדורת אחת עשרה בלילה"
 }
 
-# רשימת המודלים שנסה לפי סדר עדיפויות
-MODELS_TO_TRY = [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-2.0-flash-exp",
-    "gemini-2.0-flash"
-]
-
 def edit_news_with_ai(news_text, folder, current_hour=None):
-    """
-    מקבלת טקסט חדשות גולמי ומחזירה מהדורה ערוכה.
-    מנסה רשימת מודלים זה אחר זה עד שהקריאה מצליחה.
-    """
     api_key = os.environ.get("GEMINI_API_KEY")
 
     if not api_key:
@@ -96,21 +68,13 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 {news_text}
 """
 
-        # לולאה העוברת על כל המודלים לפי הסדר
-        for model_name in MODELS_TO_TRY:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[system_prompt, user_prompt],
-                )
-                print(f"Successfully generated news using model: {model_name}")
-                return response.text.strip()
-            except Exception as e:
-                print(f"Model {model_name} failed with error: {e}. Trying next model...")
-
-        print("All models failed. Returning raw news text.")
-        return news_text
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[system_prompt, user_prompt],
+        )
+        print("Successfully generated news using gemini-2.0-flash")
+        return response.text.strip()
 
     except Exception as e:
-        print(f"General error in AI editing: {e}")
+        print(f"Error calling Gemini API: {e}")
         return news_text
