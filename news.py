@@ -361,22 +361,27 @@ def main():
         # חיבור הידיעות בלבד ללא פתיח וסגיר מראש
         raw_news_text = "\n---\n".join(items)
 
-        # עריכת הטקסט והוספת פתיח/סגיר מותאמים באמצעות AI
-        try:
-            full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
-            print(f"AI editing completed for folder {folder}")
-            print("========== AI OUTPUT ==========")
-            print(full_edition_text)
-            print("================================")
-        except Exception as e:
-            print("AI failed, using raw text:", e)
+        # הפעלת AI רק עבור שלוחה 1 למניעת עומסים ושגיאות 429
+        if str(folder) == "1":
+            try:
+                print("Processing Folder 1 with AI...")
+                full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
+                print(f"AI editing completed for folder {folder}")
+                print("========== AI OUTPUT ==========")
+                print(full_edition_text)
+                print("================================")
+            except Exception as e:
+                print("AI failed for folder 1, using raw text:", e)
+                full_edition_text = raw_news_text
+        else:
+            print(f"Skipping AI for folder {folder}, using raw text.")
             full_edition_text = raw_news_text
 
-        print(f"AI text length: {len(full_edition_text)}")
+        print(f"Final text length: {len(full_edition_text)}")
         print(full_edition_text[:500])
 
         if len(full_edition_text.strip()) < 50:
-            print("Text too short, skipping AI result")
+            print("Text too short, skipping result")
             continue
 
         # יצירת קובץ השמע היחיד למהדורה
