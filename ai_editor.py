@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 
 HOURS_HEBREW = {
     0: "מהדורת חצות", 1: "מהדורת אחת בלילה", 2: "מהדורת שתים בלילה",
@@ -20,7 +20,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
         return news_text
 
     try:
-        genai.configure(api_key=api_key)
+        client = genai.Client(api_key=api_key)
 
         if current_hour is not None and current_hour in HOURS_HEBREW:
             edition_time_str = HOURS_HEBREW[current_hour]
@@ -62,9 +62,11 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
         prompt = f"{system_prompt}\n\nטקסט לעריכה:\n{news_text}"
 
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        print("Successfully generated news using gemini-1.5-flash")
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
+        print("Successfully generated news using gemini-2.0-flash")
         return response.text.strip()
 
     except Exception as e:
