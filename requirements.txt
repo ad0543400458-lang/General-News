@@ -3,5 +3,4 @@ gtts
 pydub
 requests
 pytz
-openai
 google-genai
