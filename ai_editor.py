@@ -1,7 +1,6 @@
 import os
 from google import genai
 
-# מיפוי השעות לניסוח טבעי בעברית
 HOURS_HEBREW = {
     0: "מהדורת חצות",
     1: "מהדורת אחת בלילה",
@@ -36,17 +35,19 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
     api_key = os.environ.get("GEMINI_API_KEY")
 
     if not api_key:
-        raise Exception("המשתנה GEMINI_API_KEY אינו מוגדר במערכת")
+        print("GEMINI_API_KEY is missing, returning raw text.")
+        return news_text
 
-    client = genai.Client(api_key=api_key)
+    try:
+        client = genai.Client(api_key=api_key)
 
-    if current_hour is not None and current_hour in HOURS_HEBREW:
-        edition_time_str = HOURS_HEBREW[current_hour]
-        intro_text = f"אתם מאזינים ל{edition_time_str} בחדשות המידע."
-    else:
-        intro_text = "אתם מאזינים למהדורת החדשות בחדשות המידע."
+        if current_hour is not None and current_hour in HOURS_HEBREW:
+            edition_time_str = HOURS_HEBREW[current_hour]
+            intro_text = f"אתם מאזינים ל{edition_time_str} בחדשות המידע."
+        else:
+            intro_text = "אתם מאזינים למהדורת החדשות בחדשות המידע."
 
-    system_prompt = f"""
+        system_prompt = f"""
 אתה עורך החדשות הראשי של תחנת רדיו.
 מטרתך להכין מהדורת חדשות מקצועית, קצרה וקולחת המיועדת להקראה על ידי קריין.
 
@@ -61,7 +62,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
    - כלכלה ונדל"ן
    - תחבורה
    - תחזית לסיום
-5. חובה לכתוב את שם הקטגוריה בצורה טבעית להקראה לפני כל קבוצת ידיעות (לדוגמה: "בפוליטיקה ובביטחון", "בחדשות החוץ", "בתחבורה", "ולסיום, תחזית מזג האוויר").
+5. חובה לכתוב את שם הקטגוריה בצורה טבעית להקראה לפני כל קבוצת ידיעות.
 6. קטגוריית מזג האוויר תמיד תהיה אחרונה.
 7. אין להזכיר מקורות, אתרי חדשות או שמות כתבים.
 8. הסר מילים כגון: מבזק, עדכון, דיווח ראשוני, פרסום ראשון.
@@ -78,7 +79,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 עד כאן מהדורת החדשות. תודה שהאזנתם ולהתראות במהדורה הבאה.
 """
 
-    user_prompt = f"""
+        user_prompt = f"""
 מספר השלוחה: {folder}
 
 ערוך את הידיעות למהדורת חדשות קצרה ומסודרת:
@@ -86,22 +87,12 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 {news_text}
 """
 
-    try:
-        # שימוש במודל יציב וזמין
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=[system_prompt, user_prompt],
         )
         return response.text.strip()
+
     except Exception as e:
-        print(f"Error calling Gemini API with gemini-1.5-flash: {e}")
-        try:
-            # ניסיון חלופי עם gemini-2.0-flash במידה ונתמך
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[system_prompt, user_prompt],
-            )
-            return response.text.strip()
-        except Exception as e2:
-            print(f"Fallback model also failed: {e2}")
-            return news_text
+        print(f"Error calling Gemini API: {e}")
+        return news_text
