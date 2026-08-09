@@ -118,7 +118,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
     except Exception as e:
         # במקרה של ניסיון גישה למודל חלופי אם 1.5 לא זמין בחשבונך
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model = genai.GenerativeModel('gemini-1.5-flash')
             contents=[system_prompt, user_prompt],
         )
         return response.text.strip()
