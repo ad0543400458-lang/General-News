@@ -28,9 +28,18 @@ HOURS_HEBREW = {
     23: "מהדורת אחת עשרה בלילה"
 }
 
+# רשימת המודלים שנסה לפי סדר עדיפויות
+MODELS_TO_TRY = [
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "gemini-2.0-flash-exp",
+    "gemini-2.0-flash"
+]
+
 def edit_news_with_ai(news_text, folder, current_hour=None):
     """
-    מקבלת טקסט חדשות גולמי ומחזירה מהדורה ערוכה באמצעות Google Gemini API
+    מקבלת טקסט חדשות גולמי ומחזירה מהדורה ערוכה.
+    מנסה רשימת מודלים זה אחר זה עד שהקריאה מצליחה.
     """
     api_key = os.environ.get("GEMINI_API_KEY")
 
@@ -87,12 +96,21 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 {news_text}
 """
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[system_prompt, user_prompt],
-        )
-        return response.text.strip()
+        # לולאה העוברת על כל המודלים לפי הסדר
+        for model_name in MODELS_TO_TRY:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=[system_prompt, user_prompt],
+                )
+                print(f"Successfully generated news using model: {model_name}")
+                return response.text.strip()
+            except Exception as e:
+                print(f"Model {model_name} failed with error: {e}. Trying next model...")
+
+        print("All models failed. Returning raw news text.")
+        return news_text
 
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        print(f"General error in AI editing: {e}")
         return news_text
