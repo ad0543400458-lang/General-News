@@ -240,34 +240,69 @@ def clean_text_for_tts(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+
 def main():
     old_news = load_history()
     old_news_set = set(old_news)
     now_il = datetime.now(TIMEZONE)
 
+    # חלון איסוף מיוחד לשלוחה 1 בשעות המהדורות המורחבות
+    extended_windows = {
+        7: 7 * 60 * 60,    # 07:00 - שבע שעות
+        14: 7 * 60 * 60,   # 14:00 - שבע שעות
+        19: 5 * 60 * 60,   # 19:00 - חמש שעות
+        0: 17 * 60 * 60    # 00:00 - שבע עשרה שעות
+    }
+
     for folder, category in categories.items():
         raw_items = []
         seen = set()
+
         keywords = category.get("keywords", [])
-        max_age = category.get("max_age_seconds", 21600)
+
+        # חלון איסוף לפי שעת המהדורה
+        if str(folder) == "1":
+            max_age = extended_windows.get(
+                now_il.hour,
+                60 * 60
+            )
+        else:
+            max_age = category.get(
+                "max_age_seconds",
+                21600
+            )
 
         for source in category["sources"]:
             journalist_name = None
+
             for key, name in JOURNALISTS_MAP.items():
                 if key in source:
                     journalist_name = name
                     break
 
             try:
-                feed = feedparser.parse(source, agent=USER_AGENT)
+                feed = feedparser.parse(
+                    source,
+                    agent=USER_AGENT
+                )
             except Exception as e:
-                print(f"Error parsing source {source}: {e}")
+                print(
+                    f"Error parsing source {source}: {e}"
+                )
                 continue
 
             for item in feed.entries[:40]:
-                if hasattr(item, "published_parsed") and item.published_parsed:
-                    published = datetime(*item.published_parsed[:6], tzinfo=timezone.utc)
-                    israel_time = published.astimezone(TIMEZONE)
+                if (
+                    hasattr(item, "published_parsed")
+                    and item.published_parsed
+                ):
+                    published = datetime(
+                        *item.published_parsed[:6],
+                        tzinfo=timezone.utc
+                    )
+                    israel_time = published.astimezone(
+                        TIMEZONE
+                    )
                 else:
                     israel_time = now_il
 
@@ -282,13 +317,26 @@ def main():
 
                 original_title = item.title.strip()
 
-                clean_title = re.sub(r'\s*-\s*[^\-]+\s*$', '', original_title)
-                clean_title = re.sub(r'<.*?>', '', clean_title)
-                clean_title = re.sub(r'[A-Za-z]+', '', clean_title)
+                clean_title = re.sub(
+                    r'\s*-\s*[^\-]+\s*$',
+                    '',
+                    original_title
+                )
+                clean_title = re.sub(
+                    r'<.*?>',
+                    '',
+                    clean_title
+                )
+                clean_title = re.sub(
+                    r'[A-Za-z]+',
+                    '',
+                    clean_title
+                )
 
                 link = getattr(item, "link", "")
 
                 summary = ""
+
                 if hasattr(item, "content"):
                     summary = item.content[0].value.strip()
                 elif hasattr(item, "summary"):
