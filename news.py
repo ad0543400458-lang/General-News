@@ -206,9 +206,28 @@ categories = {
         "max_age_seconds": 3600  # 1 שעה
     },
     "2": {
-        "sources": sources_general + sources_local,
-        "keywords": keywords_folder_2,
-        "max_age_seconds": 21600
+        "sources": [
+            "https://news.google.com/rss/search?q=%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=%22רכס+שועפאט%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+            
+            # חיפושים ממוקדים בגוגל חדשות לפי מגוון ביטויים
+            "https://news.google.com/rss/search?q=%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=%22רכס+שועפאט%22&hl=he&gl=IL&ceid=IL:he",
+            
+            # חיפוש ממוקד לפי אתרים מרכזיים
+            "https://news.google.com/rss/search?q=site:kikar.co.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=site:bhol.co.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=site:kore.co.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=site:col.org.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=site:inn.co.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he"
+        ],
+        "keywords": ["רמת שלמה", "ברמת שלמה" "רכס שועפאט"],
+        "max_age_seconds": 86400
     },
     "3": {
         "sources": sources_general + sources_economy,
@@ -246,6 +265,15 @@ def main():
     old_news_set = set(old_news)
     now_il = datetime.now(TIMEZONE)
 
+    # הגדרת שעות פעילות לכל שלוחה
+    SCHEDULED_HOURS = {
+        "1": None,          # רץ תמיד בכל הפעלה
+        "2": None,          # רץ תמיד בכל הפעלה
+        "3": [8, 14, 20],   # רץ בשעות 08:00, 14:00, 20:00 בלבד
+        "4": [8, 20],       # רץ בשעות 08:00, 20:00 בלבד
+        "5": [7, 19]        # רץ בשעות 07:00, 19:00 בלבד
+    }
+    
     # חלון איסוף מיוחד לשלוחה 1 בשעות המהדורות המורחבות
     extended_windows = {
         7: 7 * 60 * 60,    # 07:00 - שבע שעות
@@ -255,6 +283,12 @@ def main():
     }
 
     for folder, category in categories.items():
+        # בדיקה האם השלוחה אמורה לרוץ בשעה הנוכחית
+        allowed_hours = SCHEDULED_HOURS.get(str(folder))
+        if allowed_hours is not None and now_il.hour not in allowed_hours:
+            print(f"Skipping folder {folder} - not scheduled for hour {now_il.hour}")
+            continue
+
         raw_items = []
         seen = set()
 
@@ -409,20 +443,16 @@ def main():
         # חיבור הידיעות בלבד ללא פתיח וסגיר מראש
         raw_news_text = "\n---\n".join(items)
 
-        # הפעלת AI רק עבור שלוחה 1 למניעת עומסים ושגיאות 429
-        if str(folder) == "1":
-            try:
-                print("Processing Folder 1 with AI...")
-                full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
-                print(f"AI editing completed for folder {folder}")
-                print("========== AI OUTPUT ==========")
-                print(full_edition_text)
-                print("================================")
-            except Exception as e:
-                print("AI failed for folder 1, using raw text:", e)
-                full_edition_text = raw_news_text
-        else:
-            print(f"Skipping AI for folder {folder}, using raw text.")
+        # הפעלת AI עבור השלוחה שרצה כעת
+        try:
+            print(f"Processing Folder {folder} with AI...")
+            full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
+            print(f"AI editing completed for folder {folder}")
+            print("========== AI OUTPUT ==========")
+            print(full_edition_text)
+            print("================================")
+        except Exception as e:
+            print(f"AI failed for folder {folder}, using raw text:", e)
             full_edition_text = raw_news_text
 
         print(f"Final text length: {len(full_edition_text)}")
