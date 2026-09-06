@@ -226,7 +226,7 @@ categories = {
             "https://news.google.com/rss/search?q=site:col.org.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
             "https://news.google.com/rss/search?q=site:inn.co.il+%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he"
         ],
-        "keywords": ["רמת שלמה", "ברמת שלמה" "רכס שועפאט"],
+        "keywords": ["רמת שלמה", "ברמת שלמה", "רכס שועפאט"],
         "max_age_seconds": 86400
     },
     "3": {
