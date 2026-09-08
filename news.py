@@ -5,10 +5,15 @@ import hashlib
 import pytz
 import requests
 import feedparser
+import asyncio
+import edge_tts
 from datetime import datetime, timezone
-from gtts import gTTS
 from pydub import AudioSegment
 from ai_editor import edit_news_with_ai
+
+async def create_tts(text, output_file):
+    communicate = edge_tts.Communicate(text, "he-IL-AvriNeural")
+    await communicate.save(output_file)
 
 # ===========================
 # הגדרות כלליות
@@ -248,11 +253,10 @@ def main():
         mp3_name = f"news_{folder}.mp3"
         wav_name = f"news_{folder}.wav"
 
-        tts = gTTS(full_edition_text.strip(), lang="iw")
-        tts.save(mp3_name)
+        asyncio.run(create_tts(full_edition_text.strip(), mp3_name))
 
         audio = AudioSegment.from_mp3(mp3_name)
-        audio = audio.speedup(playback_speed=1.25).set_frame_rate(8000).set_channels(1)
+        audio = audio.set_frame_rate(8000).set_channels(1).set_sample_width(2)
         audio.export(wav_name, format="wav")
 
         # העלאה לימות המשיח
