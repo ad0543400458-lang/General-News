@@ -40,44 +40,44 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
     try:
         client = genai.Client(api_key=api_key)
 
-        # קביעת פתיח לפי סוג המהדורה
-        if current_hour is not None and current_hour in HOURS_HEBREW:
-            edition_time_str = HOURS_HEBREW[current_hour]
+        # קביעת פתיח דינמי לפי מספר השלוחה
+        folder_num = str(folder).strip()
 
-            extended_editions = {
-                7: "מורחבת",
-                14: "מורחבת",
-                19: "מורחבת"
-            }
-
-            # מהדורת חצות המורחבת
-            if current_hour == 0:
-                intro_text = (
-                    "אתם מאזינים למהדורת חצות המורחבת, "
-                    "סיכום חדשות היום, בחדשות המידע."
-                )
-
-            # מהדורות מורחבות
-            elif current_hour in extended_editions:
-                intro_text = (
-                    f"אתם מאזינים למהדורה "
-                    f"{extended_editions[current_hour]}, "
-                    f"{edition_time_str} בחדשות המידע."
-                )
-
-            # מהדורות רגילות
-            else:
-                intro_text = (
-                    f"אתם מאזינים ל{edition_time_str} "
-                    f"בחדשות המידע."
-                )
-
+        if folder_num == "2":
+            intro_text = "עדכוני השכונה."
+        elif folder_num == "3":
+            intro_text = "עדכוני ירידות מחירי הדיור."
+        elif folder_num == "4":
+            intro_text = "עדכוני התנועה."
+        elif folder_num == "5":
+            intro_text = "עדכון תחזית."
         else:
-            intro_text = (
-                "אתם מאזינים למהדורת החדשות בחדשות המידע."
-            )
+            # ברירת מחדל למהדורה המרכזית (שלוחה 1)
+            if current_hour is not None and current_hour in HOURS_HEBREW:
+                edition_time_str = HOURS_HEBREW[current_hour]
+
+                extended_editions = {7: "מורחבת", 14: "מורחבת", 19: "מורחבת"}
+
+                if current_hour == 0:
+                    intro_text = (
+                        "אתם מאזינים למהדורת חצות המורחבת, "
+                        "סיכום חדשות היום, בחדשות המידע."
+                    )
+                elif current_hour in extended_editions:
+                    intro_text = (
+                        f"אתם מאזינים למהדורה "
+                        f"{extended_editions[current_hour]}, "
+                        f"{edition_time_str} בחדשות המידע."
+                    )
+                else:
+                    intro_text = (
+                        f"אתם מאזינים ל{edition_time_str} " f"בחדשות המידע."
+                    )
+            else:
+                intro_text = "אתם מאזינים למהדורת החדשות בחדשות המידע."
 
         system_prompt = f"""
+        
 אתה עורך החדשות הראשי של תחנת רדיו.
 
 המטרה שלך היא להפוך את הידיעות הגולמיות למהדורת חדשות מקצועית,
