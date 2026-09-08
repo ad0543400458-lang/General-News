@@ -1,5 +1,5 @@
 feedparser
-gtts
+edge-tts
 pydub
 requests
 pytz
