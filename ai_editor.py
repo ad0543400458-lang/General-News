@@ -57,7 +57,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
             outro_text = "עד כאן עדכון התחזית."
         else:
             # ברירת מחדל למהדורה המרכזית (שלוחה 1)
-            outro_text = "עד כאן המהדורה. תודה שהאזנתם, ולהתראות במהדורה הבאה."
+            outro_text = "עד כאן המהדורה. תודה, ולהתראות במהדורה הבאה."
             if current_hour is not None and current_hour in HOURS_HEBREW:
                 edition_time_str = HOURS_HEBREW[current_hour]
 
