@@ -70,7 +70,30 @@ sources_ramat_shlomo = [
     "https://news.google.com/rss/search?q=%22רמת+שלמה%22&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=רמת+שלמה+ירושלים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=שכונת+רמת+שלמה&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=%22רכס+שועפאט%22&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=%22רכס+שועפאט%22&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22חזון+איש%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22דרוק%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22אגרות+משה%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22גולדקנופף%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22לובביץ%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22זולטי%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22ברים%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22פטאל%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22כהנמן%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22הרשלר%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22קהילות+יעקב%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22שטפנשט%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22קלכהיים%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22ברכת+אברהם%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22סדיגורה%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22חדש%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22לופיאן%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22בוקסבוים%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22יגאל+ידין%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22מבוא+הברכה%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22קלואינימוס%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22טולדנו%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=%22מוצפי%22+ירושלים&hl=he&gl=IL&ceid=IL:he"
 ]
 
 sources_economy = [
@@ -110,7 +133,11 @@ categories = {
     "2": {
         "name": "רמת שלמה",
         "sources": sources_ramat_shlomo,
-        "keywords": ["רמת שלמה", "ברמת שלמה", "רכס שועפאט"],
+        "keywords": ["רמת שלמה", "חזון איש", "דרוק", "אגרות משה", "גולדקנופף", 
+            "לובביץ", "זולטי", "ברים", "פטאל", "כהנמן", "הרשלר", 
+            "קהילות יעקב", "שטפנשט", "קלכהיים", "ברכת אברהם", "סדיגורה", 
+            "חדש", "לופיאן", "בוקסבאום", "בוקסבוים", "ידין", "מבוא הברכה", 
+            "קלואינימוס", "טולדנו", "מוצפי", "ברמת שלמה", "רכס שועפאט"],
         "max_age_seconds": 86400  # 24 שעות
     },
     "3": {
