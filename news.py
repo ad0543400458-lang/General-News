@@ -12,7 +12,8 @@ from pydub import AudioSegment
 from ai_editor import edit_news_with_ai
 
 async def create_tts(text, output_file):
-    communicate = edge_tts.Communicate(text, "he-IL-AvriNeural")
+    # ניתן לשנות את הקצב (למשל "+10%" להאצה קלה, "+15%" להאצה משמעותית יותר, או "-10%" להאטה)
+    communicate = edge_tts.Communicate(text, "he-IL-AvriNeural", rate="+20%")
     await communicate.save(output_file)
 
 # ===========================
