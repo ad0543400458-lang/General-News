@@ -13,7 +13,7 @@ from ai_editor import edit_news_with_ai
 
 async def create_tts(text, output_file):
     # ניתן לשנות את הקצב (למשל "+10%" להאצה קלה, "+15%" להאצה משמעותית יותר, או "-10%" להאטה)
-    communicate = edge_tts.Communicate(text, "he-IL-AvriNeural", rate="+20%")
+    communicate = edge_tts.Communicate(text, "he-IL-AvriNeural", rate="+15%")
     await communicate.save(output_file)
 
 # ===========================
