@@ -88,7 +88,13 @@ sources_transport = [
 
 sources_weather = [
     "https://news.google.com/rss/search?q=מזג+אוויר&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=תחזית+מזג+האוויר&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=תחזית+מזג+האוויר&hl=he&gl=IL&ceid=IL:he",
+    # הזנה ישירה של תחזית מזג האוויר מ-Ynet ו-Walla (מכיל תחזית יומית מפורטת)
+    "https://www.ynet.co.il/Integration/StoryRss185.xml",
+    "https://rss.walla.co.il/feed/1",
+    # חיפושים ממוקדים בגוגל חדשות
+    "https://news.google.com/rss/search?q=%22תחזית+מזג+האוויר%22+הימים+הקרובים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=תחזית+מזג+האוויר+השבוע&hl=he&gl=IL&ceid=IL:he"
 ]
 
 # ===========================
