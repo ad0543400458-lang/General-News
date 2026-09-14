@@ -135,7 +135,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
    חדשות כלליות
    כלכלה ונדל"ן
    בתחבורה
-   תחזית לסיום
+   תחזית מזג האוויר
 
    ניתן להוסיף קטגוריה נוספת רק אם קיימות בטקסט ידיעות
    שמתאימות בבירור לקטגוריה זו.
@@ -154,7 +154,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 8. לפני כל קבוצת ידיעות כתוב את שם הקטגוריה בצורה טבעית
    להקראה.
 
-9. אל תקריא את שם האתר, שם המקור או שם הכתב,
+9. אל תקריא את שם האתר, או שם המקור ,
    גם אם הם מופיעים בטקסט המקורי.
 
 10. אין להשתמש בביטויים כגון:
@@ -215,7 +215,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
                 response = client.models.generate_content(
                     model="gemini-3.5-flash",
-                    contents=prompt,
+                    contents=system_prompt,
                 )
 
                 if not response.text:
