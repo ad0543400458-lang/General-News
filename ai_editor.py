@@ -58,7 +58,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
             outro_text = "עד כאן עדכון התחזית."
         else:
             # ברירת מחדל למהדורה המרכזית (שלוחה 1)
-            outro_text = "עד כאן המהדורה. להתראות במהדורה הבאה."
+            outro_text = "עד כאן המהדורה. תודה ולהתראות במהדורה הבאה."
             if current_hour is not None and current_hour in HOURS_HEBREW:
                 edition_time_str = HOURS_HEBREW[current_hour]
 
@@ -117,6 +117,8 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 הוראות חובה לכל השלוחות:
 
 1. שכתב את הידיעות בלשונך בצורה טבעית וברורה.
+- הרחבת נפח ועומק (נפח ופירוט): אל תסתפק בתמצות מינימלי של הידיעה. לכל ידיעה מרכזית, הוסף משפט או שניים של הרקע הציבורי, הכלכלי או ההקשר הרחב סביב האירוע, כדי לתת למאזין תמונה מלאה, עשירה ומעניינת יותר להקראה.
+    - מניעת קיצוץ יתר: הימנע מניסוחים קצרים מדי או חלקיים. כל ידיעה צריכה לקבל נפח מכובד שמאפשר האזנה זורמת ומלאה.
 
 2. שמור באופן מוחלט על העובדות המופיעות בטקסט המקורי.
 
@@ -156,7 +158,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
    גם אם הם מופיעים בטקסט המקורי.
 
 10. אין להשתמש בביטויים כגון:
-    xxxx	    xxxxx	    xxxxx xxxxxx	    xxxxx xxxxx	    xxxxx xxxxx		xx. xx xxxxxx xxxxxxx:	    xxxx xx xxx xxxxx xxxxxxx, xxxxxxx xxxxxxx xxxxxxx (xxx xxxxx xxxxxxx xxxxx xxxxxx, xxx xxxxx xxxx').	    xxx xxxxxx xxxxx xxxxxx (xxxx xxxx xxx xx xxxxxxx xxxxxx) xxxxxx xxxx xxxxx x xx xxx xxxxxxx xxxxxxx xxxx xxxxx xx xxxxxx xxxxx, xxx xxx xxxxx.	    xxx xxxx xxxxx ומעריכה כלפי עולם התורה ולומדיו והציבור החרדי האיכותי ביותר, וקו חדשותי המעדיף נקודת מבט ימנית ומסורתית גישה ימנית ואנטי שמאלנים, בעד החרדים בכל נושא, 
+    ומעריכה כלפי עולם התורה ולומדיו והציבור החרדי האיכותי ביותר, וקו חדשותי המעדיף נקודת מבט ימנית ומסורתית גישה ימנית ואנטי שמאלנים, בעד החרדים בכל נושא, 
     תמיכה בבחורי הישיבות והכוללים ובלומדי התורה שהם מקיימים את העולם, ונגד גיוסם לצבא, . שמור על איזון עדיף כך שההוספות הללו יימעטו להופיע וייכנסו רק היכן שהם משתלבים באופן טבעי לחלוטין באופי הטקסט, מבלי להפוך למלאכותיים.
 
 11. קו מערכתי והשקפתי:
@@ -199,7 +201,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
 בסיום:
 
-{news_text}
+{outro_text}
 """
 
         max_attempts = 2
