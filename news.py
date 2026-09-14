@@ -168,7 +168,7 @@ def main():
     # שעות הפעלה מוגדרות לכל שלוחה (None = רץ בכל שעה)
     SCHEDULED_HOURS = {
         "1": None,              # שעה-שעה (רציף)
-        "2": [0, 7, 14, 19],      # רמת שלמה: 3 פעמים ביום בלבד
+        "2": [0, 7, 14, 19],      # רמת שלמה: 4 פעמים ביום בלבד
         "3": [0, 7, 14, 19],
         "4": [0, 7, 14, 19],
         "5": [0, 7, 14, 19]
@@ -252,12 +252,20 @@ def main():
                 unique_str = f"{folder}_{link}_{''.join(hebrew_words[:8])}"
                 fingerprint = hashlib.md5(unique_str.encode('utf-8')).hexdigest()
 
-                if fingerprint in seen or fingerprint in old_news_set:
-                    continue
+                is_extended_edition = (
+                    str(folder) == "1"
+                    and now_il.hour in extended_windows_folder_1
+                )
+
+                if not is_extended_edition:
+                    if fingerprint in seen or fingerprint in old_news_set:
+                        continue
 
                 seen.add(fingerprint)
-                old_news.append(fingerprint)
-                old_news_set.add(fingerprint)
+
+                if not is_extended_edition:
+                    old_news.append(fingerprint)
+                    old_news_set.add(fingerprint)
 
                 raw_items.append({
                     "time_obj": israel_time,
