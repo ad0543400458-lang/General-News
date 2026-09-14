@@ -1,4 +1,5 @@
 import os
+import time
 from google import genai
 
 
@@ -198,36 +199,57 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
 בסיום:
 
-{outro_text}
-"""
-
-        prompt = f"""
-{system_prompt}
-
-טקסט הידיעות לעריכה:
-
 {news_text}
 """
 
-        response = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=prompt,
-        )
+        max_attempts = 2
 
-        if not response.text:
-            print(
-                "Gemini returned an empty response. "
-                "Using raw text."
-            )
-            return news_text
+        for attempt in range(1, max_attempts + 1):
+            try:
+                print(
+                    f"Calling Gemini "
+                    f"(attempt {attempt}/{max_attempts})..."
+                )
 
-        print(
-            "Successfully generated news using "
-            "gemini-3.5-flash"
-        )
+                response = client.models.generate_content(
+                    model="gemini-3.5-flash",
+                    contents=prompt,
+                )
 
-        return response.text.strip()
+                if not response.text:
+                    print(
+                        f"Gemini returned an empty response "
+                        f"on attempt {attempt}."
+                    )
 
+                    if attempt < max_attempts:
+                        time.sleep(5)
+                        continue
+
+                    print("Using raw text after failed attempts.")
+                    return news_text
+
+                print(
+                    "Successfully generated news using "
+                    "gemini-3.5-flash"
+                )
+
+                return response.text.strip()
+
+            except Exception as e:
+                print(
+                    f"Gemini attempt {attempt}/{max_attempts} failed: {e}"
+                )
+
+                if attempt < max_attempts:
+                    print("Waiting 5 seconds before retry...")
+                    time.sleep(5)
+                else:
+                    print(
+                        "Gemini failed after all attempts. "
+                        "Using raw text."
+                    )
+                    return news_text
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
         return news_text
