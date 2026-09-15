@@ -204,7 +204,8 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 {outro_text}
 """
 
-        max_attempts = 2
+        max_attempts = 3
+        retry_delay = 120
 
         for attempt in range(1, max_attempts + 1):
             try:
@@ -215,7 +216,12 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
                 response = client.models.generate_content(
                     model="gemini-3.5-flash",
-                    contents=system_prompt,
+                    contents=f"""
+{system_prompt}
+
+טקסט הידיעות לעריכה:
+{news_text}
+""",
                 )
 
                 if not response.text:
@@ -225,11 +231,12 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                     )
 
                     if attempt < max_attempts:
-                        time.sleep(5)
+                        time.sleep(retry_delay)
                         continue
 
-                    print("Using raw text after failed attempts.")
-                    return news_text
+                    raise RuntimeError(
+                        "Gemini returned an empty response after all attempts."
+                    )
 
                 print(
                     "Successfully generated news using "
@@ -244,14 +251,19 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                 )
 
                 if attempt < max_attempts:
-                    print("Waiting 5 seconds before retry...")
-                    time.sleep(5)
+                    print(
+                        f"Waiting {retry_delay} seconds before retry..."
+                    )
+                    time.sleep(retry_delay)
                 else:
                     print(
                         "Gemini failed after all attempts. "
-                        "Using raw text."
+                        "No edition will be created."
                     )
-                    return news_text
+                    raise RuntimeError(
+                        "Gemini failed after all attempts."
+                    ) from e
+
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
-        return news_text
+        raise RuntimeError("Gemini API failed.") from e
