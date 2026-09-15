@@ -282,13 +282,18 @@ def main():
         # עיבוד ב-AI
         try:
             print(f"Processing Folder {folder} ({category['name']}) with AI...")
-            full_edition_text = edit_news_with_ai(raw_news_text, folder, current_hour=now_il.hour)
+            full_edition_text = edit_news_with_ai(
+                raw_news_text,
+                folder,
+                current_hour=now_il.hour
+            )
         except Exception as e:
-            print(f"AI failed for folder {folder}, using raw text: {e}")
-            full_edition_text = raw_news_text
+            print(f"AI editing failed for folder {folder}: {e}")
+            print(f"Skipping folder {folder} - no raw news will be uploaded.")
+            continue
 
-        if len(full_edition_text.strip()) < 40:
-            print(f"Output text too short for folder {folder}, skipping audio generation.")
+        if not full_edition_text or len(full_edition_text.strip()) < 40:
+            print(f"AI returned no valid edition for folder {folder}. Skipping upload.")
             continue
 
         # יצירת הקובץ הקולי
