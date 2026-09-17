@@ -93,7 +93,17 @@ sources_ramat_shlomo = [
     "https://news.google.com/rss/search?q=%22מבוא+הברכה%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=%22קלואינימוס%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
     "https://news.google.com/rss/search?q=%22טולדנו%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
-    "https://news.google.com/rss/search?q=%22מוצפי%22+ירושלים&hl=he&gl=IL&ceid=IL:he"
+    "https://news.google.com/rss/search?q=%22מוצפי%22+ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+חדשות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+מבזק&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+שכונות&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+כבישים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+עירייה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+תחבורה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+בנייה&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+חדשות+חרדים&hl=he&gl=IL&ceid=IL:he",
+    "https://news.google.com/rss/search?q=ירושלים+רמת+שלמה&hl=he&gl=IL&ceid=IL:he"
 ]
 
 sources_economy = [
@@ -133,29 +143,25 @@ categories = {
     "2": {
         "name": "רמת שלמה",
         "sources": sources_ramat_shlomo,
-        "keywords": ["רמת שלמה", "חזון איש", "דרוק", "אגרות משה", "גולדקנופף", 
-            "לובביץ", "זולטי", "ברים", "פטאל", "כהנמן", "הרשלר", 
-            "קהילות יעקב", "שטפנשט", "קלכהיים", "ברכת אברהם", "סדיגורה", 
-            "חדש", "לופיאן", "בוקסבאום", "בוקסבוים", "ידין", "מבוא הברכה", 
-            "קלואינימוס", "טולדנו", "מוצפי", "ברמת שלמה", "רכס שועפאט"],
-        "max_age_seconds": 86400  # 24 שעות
+        "keywords": [],
+        "max_age_seconds": 86400
     },
-    "3": {
+   "3": {
         "name": "כלכלה ונדל\"ן",
         "sources": sources_economy,
-        "keywords": ["ירידת מחירי הדיור", "ירידת מחירי הדירות", "הורדת מחירי", "ירידת מחירי", "הורדת מחירי הדיור"],
+        "keywords": [],
         "max_age_seconds": 21600
     },
     "4": {
         "name": "תחבורה",
         "sources": sources_transport,
-        "keywords": ["תחבורה", "כביש", "רכבת", "פקק", "חסימה"],
+        "keywords": [],
         "max_age_seconds": 21600
     },
     "5": {
         "name": "מזג אוויר",
         "sources": sources_weather,
-        "keywords": ["תחזית", "מזג אוויר", "גשם", "טמפרטורות"],
+        "keywords": [],
         "max_age_seconds": 21600
     }
 }
