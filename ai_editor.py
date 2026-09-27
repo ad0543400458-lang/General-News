@@ -71,7 +71,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                     )
                 elif current_hour in extended_editions:
                     intro_text = (
-                        f"אתם מאזינים למהדורה "
+                        f"אתם מאזינים, למהדורה "
                         f"{extended_editions[current_hour]}, "
                         f"{edition_time_str} בחדשות המידע."
                     )
