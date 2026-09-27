@@ -66,7 +66,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
                 if current_hour == 0:
                     intro_text = (
-                        "אתם מאזינים למהדורת חצות המורחבת, "
+                        "אתם מאזינים, למהדורת חצות המורחבת, "
                         "סיכום חדשות היום, בחדשות המידע."
                     )
                 elif current_hour in extended_editions:
@@ -80,7 +80,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                         f"אתם מאזינים ל{edition_time_str} " f"בחדשות המידע."
                     )
             else:
-                intro_text = "אתם מאזינים למהדורת החדשות בחדשות המידע."
+                intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
 
         system_prompt = f"""
         
