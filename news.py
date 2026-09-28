@@ -23,6 +23,14 @@ TIMEZONE = pytz.timezone('Asia/Jerusalem')
 HISTORY_FILE = 'seen_news.json'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
+from hebrewhcal import Zmanim # או ספריית חישוב זמנים מועדפת
+
+def is_shabbat_time(now_il):
+    # פונקציה לבדיקה האם כעת נכנסה השבת ועד מוצאי שבת (כולל 5 דקות אחרי צאת השבת)
+    # מחזירה True אם אסור להעלות מהדורות רגילות
+    # ניתן להגדיר כאן שליפת כניסת/יציאת שבת אוטומטית לפי מיקום ירושלים
+    return False # יוחלף בלוגיקת בדיקה אמיתית לפי שעון מערכת
+    
 # ===========================
 # ניהול היסטוריה
 # ===========================
@@ -188,12 +196,19 @@ def main():
         0: 17 * 3600   # מהדורת חצות
     }
 
+# אם זו השבת - עוצרים לחלוטין את הריצה של כל השלוחות הרגילות
+    if is_shabbat_time(now_il):
+        print("Shabbat mode active - skipping regular news run.")
+        return
+
     for folder, category in categories.items():
         # בדיקה אם השלוחה מתוכננת לרוץ בשעה הנוכחית
         allowed_hours = SCHEDULED_HOURS.get(str(folder))
         if allowed_hours is not None and now_il.hour not in allowed_hours:
             print(f"Skipping folder {folder} ({category['name']}) - not scheduled for hour {now_il.hour}")
             continue
+
+        
 
         raw_items = []
         seen = set()
