@@ -58,7 +58,14 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
             outro_text = "עד כאן עדכון התחזית."
         else:
             # ברירת מחדל למהדורה המרכזית (שלוחה 1)
-            outro_text = "עד כאן המהדורה. תודה ולהתראות במהדורה הבאה."
+            # בדיקה דינמית האם זו המהדורה האחרונה של ערב שבת או מהדורת מוצאי שבת
+            if current_hour in [15, 16]: # דוגמה לשעות ערב שישי המוקדמות
+                outro_text = "עד כאן המהדורה. אנו מאחלים למאזיננו ולכל עם ישראל שבת שלום ושקטה נשוב בעזרת השם במוצאי השבת."
+            elif current_hour and current_hour >= 18 and now_il.weekday() == 6: # מוצאי שבת
+                intro_text = "שבוע טוב! אתם מאזינים למהדורת מוצאי שבת המורחבת, סיכום חדשות השבת."
+                outro_text = "עד כאן מהדורת מוצאי השבת. תודה ולהתראות במהדורה הבאה."
+            else:
+                outro_text = "עד כאן המהדורה. תודה ולהתראות במהדורה הבאה."
             if current_hour is not None and current_hour in HOURS_HEBREW:
                 edition_time_str = HOURS_HEBREW[current_hour]
 
