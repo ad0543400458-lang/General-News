@@ -23,7 +23,6 @@ TIMEZONE = pytz.timezone('Asia/Jerusalem')
 HISTORY_FILE = 'seen_news.json'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
-from hebrewhcal import Zmanim # או ספריית חישוב זמנים מועדפת
 
 def is_shabbat_time(now_il):
     # פונקציה לבדיקה האם כעת נכנסה השבת ועד מוצאי שבת (כולל 5 דקות אחרי צאת השבת)
