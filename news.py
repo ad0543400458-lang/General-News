@@ -2,7 +2,7 @@ import os
 import re
 import json
 import hashlib
-from zoneinfo import ZoneInfo
+import pytz
 import requests
 import feedparser
 import asyncio
@@ -19,7 +19,7 @@ async def create_tts(text, output_file):
 # ===========================
 # הגדרות כלליות
 # ===========================
-TIMEZONE = ZoneInfo('Asia/Jerusalem')
+TIMEZONE = pytz.timezone('Asia/Jerusalem')
 HISTORY_FILE = 'seen_news.json'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
@@ -337,7 +337,8 @@ def main():
             full_edition_text = edit_news_with_ai(
                 raw_news_text,
                 folder,
-                current_hour=now_il.hour
+                current_hour=now_il.hour,
+                TIMEZONE=TIMEZONE
             )
         except Exception as e:
             print(f"AI editing failed for folder {folder}: {e}")
