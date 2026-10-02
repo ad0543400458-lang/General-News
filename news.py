@@ -24,7 +24,8 @@ HISTORY_FILE = 'seen_news.json'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 
-from zmanim.hebrew_calendar.jewish_calendar import JewishCalendar
+from zmanim.util.geo_location import GeoLocation
+from zmanim.zmanim_calendar import ZmanimCalendar
 from datetime import timedelta
 
 def is_shabbat_time(now_il):
@@ -33,12 +34,19 @@ def is_shabbat_time(now_il):
     if weekday not in [4, 5, 6]:
         return False
 
+    # הגדרת מיקום (לדוגמה: ירושלים)
+    # GeoLocation(location_name, latitude, longitude, elevation, time_zone)
+    geo_location = GeoLocation("Jerusalem", 31.778, 35.235, 800, TIMEZONE)
+    
+    # יצירת לוח זמנים עבור התאריך הנוכחי
+    zmanim_cal = ZmanimCalendar(geo_location=geo_location)
+
     if weekday == 4:  # יום שישי
-        sunset = JewishCalendar(date=now_il.date()).sunset()
+        zmanim_cal.date = now_il.date()
+        sunset = zmanim_cal.sunset()
 
         if sunset:
             candle_lighting = sunset.astimezone(TIMEZONE) - timedelta(minutes=40)
-
             if now_il >= candle_lighting:
                 return True
 
@@ -47,15 +55,15 @@ def is_shabbat_time(now_il):
 
     elif weekday == 6:  # מוצאי שבת
         yesterday = now_il.date() - timedelta(days=1)
-        sunset = JewishCalendar(date=yesterday).sunset()
+        zmanim_cal.date = yesterday
+        sunset = zmanim_cal.sunset()
 
         if sunset:
             tzeit_shabbat = sunset.astimezone(TIMEZONE) + timedelta(minutes=50)
-
             if now_il <= tzeit_shabbat:
                 return True
 
-    return False    
+    return False   
 # ===========================
 # ניהול היסטוריה
 # ===========================
