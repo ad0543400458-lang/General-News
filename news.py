@@ -25,33 +25,36 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 
 from zmanim.hebrew_calendar.jewish_calendar import JewishCalendar
-from zmanim.util.jewish_date import JewishDate
 from datetime import timedelta
 
 def is_shabbat_time(now_il):
-    weekday = now_il.weekday() # 4=שישי, 5=שבת, 6=ראשון
+    weekday = now_il.weekday()  # 4=שישי, 5=שבת, 6=ראשון
+
     if weekday not in [4, 5, 6]:
         return False
-        
-    if weekday == 4: # יום שישי
-        jd = JewishDate(date=now_il.date())
-        sunset = JewishCalendar(jewish_date=jd).sunset()
+
+    if weekday == 4:  # יום שישי
+        sunset = JewishCalendar(date=now_il.date()).sunset()
+
         if sunset:
             candle_lighting = sunset.astimezone(TIMEZONE) - timedelta(minutes=40)
+
             if now_il >= candle_lighting:
                 return True
-                
-    elif weekday == 5: # שבת קודש
+
+    elif weekday == 5:  # שבת
         return True
-        
-    elif weekday == 6: # מוצאי שבת
+
+    elif weekday == 6:  # מוצאי שבת
         yesterday = now_il.date() - timedelta(days=1)
-        sunset = JewishCalendar(jewish_date=JewishDate(date=yesterday)).sunset()
+        sunset = JewishCalendar(date=yesterday).sunset()
+
         if sunset:
             tzeit_shabbat = sunset.astimezone(TIMEZONE) + timedelta(minutes=50)
+
             if now_il <= tzeit_shabbat:
                 return True
-                
+
     return False    
 # ===========================
 # ניהול היסטוריה
