@@ -2,7 +2,7 @@ import os
 import re
 import json
 import hashlib
-import pytz
+from zoneinfo import ZoneInfo
 import requests
 import feedparser
 import asyncio
@@ -19,7 +19,7 @@ async def create_tts(text, output_file):
 # ===========================
 # הגדרות כלליות
 # ===========================
-TIMEZONE = pytz.timezone('Asia/Jerusalem')
+TIMEZONE = ZoneInfo('Asia/Jerusalem')
 HISTORY_FILE = 'seen_news.json'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
