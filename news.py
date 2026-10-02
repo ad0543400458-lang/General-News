@@ -24,12 +24,35 @@ HISTORY_FILE = 'seen_news.json'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 
 
+from zmanim.hebrew_calendar.jewish_calendar import JewishCalendar
+from zmanim.util.jewish_date import JewishDate
+from datetime import timedelta
+
 def is_shabbat_time(now_il):
-    # פונקציה לבדיקה האם כעת נכנסה השבת ועד מוצאי שבת (כולל 5 דקות אחרי צאת השבת)
-    # מחזירה True אם אסור להעלות מהדורות רגילות
-    # ניתן להגדיר כאן שליפת כניסת/יציאת שבת אוטומטית לפי מיקום ירושלים
-    return False # יוחלף בלוגיקת בדיקה אמיתית לפי שעון מערכת
-    
+    weekday = now_il.weekday() # 4=שישי, 5=שבת, 6=ראשון
+    if weekday not in [4, 5, 6]:
+        return False
+        
+    if weekday == 4: # יום שישי
+        jd = JewishDate(date=now_il.date())
+        sunset = JewishCalendar(jewish_date=jd).sunset()
+        if sunset:
+            candle_lighting = sunset.astimezone(TIMEZONE) - timedelta(minutes=40)
+            if now_il >= candle_lighting:
+                return True
+                
+    elif weekday == 5: # שבת קודש
+        return True
+        
+    elif weekday == 6: # מוצאי שבת
+        yesterday = now_il.date() - timedelta(days=1)
+        sunset = JewishCalendar(jewish_date=JewishDate(date=yesterday)).sunset()
+        if sunset:
+            tzeit_shabbat = sunset.astimezone(TIMEZONE) + timedelta(minutes=50)
+            if now_il <= tzeit_shabbat:
+                return True
+                
+    return False    
 # ===========================
 # ניהול היסטוריה
 # ===========================
