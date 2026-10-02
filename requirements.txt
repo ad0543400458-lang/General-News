@@ -4,4 +4,4 @@ pydub
 requests
 pytz
 google-genai
-python-zmanim
+zmanim
