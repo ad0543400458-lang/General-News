@@ -29,7 +29,7 @@ from zmanim.zmanim_calendar import ZmanimCalendar
 from datetime import timedelta
 
 def is_shabbat_time(now_il):
-    weekday = now_il.weekday()  # 4=שישי, 5=שבת, 6=ראשון
+    weekday = now_il.weekday()
 
     if weekday not in [4, 5, 6]:
         return False
@@ -38,13 +38,13 @@ def is_shabbat_time(now_il):
         "Jerusalem",
         31.778,
         35.235,
-        TIMEZONE,
+        "Asia/Jerusalem",
         elevation=800
     )
 
     zmanim_cal = ZmanimCalendar(geo_location=geo_location)
 
-    if weekday == 4:  # יום שישי
+    if weekday == 4:
         zmanim_cal.date = now_il.date()
         sunset = zmanim_cal.sunset()
 
@@ -53,10 +53,10 @@ def is_shabbat_time(now_il):
             if now_il >= candle_lighting:
                 return True
 
-    elif weekday == 5:  # שבת
+    elif weekday == 5:
         return True
 
-    elif weekday == 6:  # מוצאי שבת
+    elif weekday == 6:
         yesterday = now_il.date() - timedelta(days=1)
         zmanim_cal.date = yesterday
         sunset = zmanim_cal.sunset()
