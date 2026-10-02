@@ -36,8 +36,7 @@ def is_shabbat_time(now_il):
 
     # הגדרת מיקום (לדוגמה: ירושלים)
     # GeoLocation(location_name, latitude, longitude, elevation, time_zone)
-    geo_location = GeoLocation("Jerusalem", 31.778, 35.235, 800, TIMEZONE)
-    
+    geo_location = GeoLocation("Jerusalem", 31.778, 35.235, 800, "Asia/Jerusalem")    
     # יצירת לוח זמנים עבור התאריך הנוכחי
     zmanim_cal = ZmanimCalendar(geo_location=geo_location)
 
