@@ -1,7 +1,7 @@
 import os
 import time
+from datetime import datetime
 from google import genai
-
 
 HOURS_HEBREW = {
     0: "מהדורת חצות",
@@ -30,8 +30,7 @@ HOURS_HEBREW = {
     23: "מהדורת אחת עשרה בלילה"
 }
 
-
-def edit_news_with_ai(news_text, folder, current_hour=None):
+def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
     api_key = os.environ.get("GEMINI_API_KEY")
 
     if not api_key:
@@ -58,17 +57,19 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
             outro_text = "עד כאן עדכון התחזית."
         else:
             # ברירת מחדל למהדורה המרכזית (שלוחה 1)
-            # בדיקה דינמית האם זו המהדורה האחרונה של ערב שבת או מהדורת מוצאי שבת
-            if current_hour in [15, 16]: # דוגמה לשעות ערב שישי המוקדמות
+            tz = TIMEZONE if TIMEZONE else datetime.now().astimezone().tzinfo
+            current_weekday = datetime.now(tz).weekday()
+            
+            if current_weekday == 4: # ערב שבת (יום שישי)
                 outro_text = "עד כאן המהדורה. אנו מאחלים למאזיננו ולכל עם ישראל שבת שלום ושקטה נשוב בעזרת השם במוצאי השבת."
-            elif current_hour and current_hour >= 18 and now_il.weekday() == 6: # מוצאי שבת
+            elif current_weekday == 5 or (current_weekday == 6 and (current_hour is not None and current_hour < 4)): # מוצאי שבת
                 intro_text = "שבוע טוב! אתם מאזינים למהדורת מוצאי שבת המורחבת, סיכום חדשות השבת."
                 outro_text = "עד כאן מהדורת מוצאי השבת. תודה ולהתראות במהדורה הבאה."
             else:
                 outro_text = "עד כאן המהדורה. תודה ולהתראות במהדורה הבאה."
+
             if current_hour is not None and current_hour in HOURS_HEBREW:
                 edition_time_str = HOURS_HEBREW[current_hour]
-
                 extended_editions = {7: "מורחבת", 14: "מורחבת", 19: "מורחבת"}
 
                 if current_hour == 0:
@@ -84,13 +85,13 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                     )
                 else:
                     intro_text = (
-                        f"אתם מאזינים, ל{edition_time_str} " f"בחדשות המידע."
+                        f"אתם מאזינים, ל{edition_time_str} "
+                        f"בחדשות המידע."
                     )
             else:
                 intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
 
         system_prompt = f"""
-        
 אתה עורך החדשות הראשי של תחנת רדיו.
 
 המטרה שלך היא להפוך את הידיעות הגולמיות למהדורת חדשות מקצועית,
@@ -106,11 +107,11 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 - שלוחה 3: הכנס רק ידיעות העוסקות בנושא ירידת מחירי הדירות בארץ, רק ידיעות המבשרות על ירידת מחירי הדיר בלבד או מהלכים או מצבים שיגרמו בוודאות או בסברות גבוהה לירידת מחירי הדיור.
 - שלוחה 4: הכנס רק ידיעות הקשורות לתחבורה, כבישים, תאונות, חסימות, עומסי תנועה, רכבות, תחבורה ציבורית ושינויים משמעותיים בדרכים.
 - שלוחה 5: הכנס רק ידיעות הקשורות למזג האוויר ולתחזית.
-  אמור בפתיח את היום והשעה לדוגמה עדכון תחזית נכון ליום שלישי שבע בערב. 
-  1. סדר את התחזית לפי ימים (היום, מחר, והימים הקרובים) בצורה ברורה וקולחת להקראה.
-  2. כלול נתונים על על המצב הכללי של התחזית בארץ בלבד במידה והם מופיעים בטקסט.
-  3. איסור מוחלט על המצאת ימים, טמפרטורות או מצבי אוויר שלא צוינו במפורש בטקסט המקורי. אם מצויינים נתונים רק ליומיים הקרובים – הציגו רק אותם.
-  4.באם יש מחלוקת משמעותית בין מודלים או בין חזאים שונים ניתן לפרט שלפי מודל .. כך ולפי מודל... כך, אפשר לומר שמות חזאים או אתרים של מזג האוויר כשמביאים תחזית משמם. 
+ אמור בפתיח את היום והשעה לדוגמה עדכון תחזית נכון ליום שלישי שבע בערב. 
+ 1. סדר את התחזית לפי ימים (היום, מחר, והימים הקרובים) בצורה ברורה וקולחת להקראה.
+ 2. כלול נתונים על על המצב הכללי של התחזית בארץ בלבד במידה והם מופיעים בטקסט.
+ 3. איסור מוחלט על המצאת ימים, טמפרטורות או מצבי אוויר שלא צוינו במפורש בטקסט המקורי. אם מצויינים נתונים רק ליומיים הקרובים – הציגו רק אותם.
+ 4.באם יש מחלוקת משמעותית בין מודלים או בין חזאים שונים ניתן לפרט שלפי מודל .. כך ולפי מודל... כך, אפשר לומר שמות חזאים או אתרים של מזג האוויר כשמביאים תחזית משמם. 
 
 חשוב במיוחד בשלוחות 2 עד 5:
 אם לאחר הסינון אין אפילו ידיעה אחת שמתאימה באמת לנושא השלוחה, אין ליצור מהדורה כלל.
@@ -237,13 +238,13 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 16. אל תחזור על אותה ידיעה בניסוחים שונים.
 
 17. במהדורות המורחבות יש לכלול את הידיעות החשובות
-    והרלוונטיות שנמצאות בטקסט שנשלח אליך, ולא לקצר
+    והדרושות שנמצאות בטקסט שנשלח אליך, ולא לקצר
     את המהדורה באופן מלאכותי.
 
 18. במהדורת חצות המורחבת מאוד יש להכין סיכום מקיף
     של חדשות היום מתוך הידיעות שנשלחו אליך, תוך מתן
     עדיפות לחדשות החשובות והמשמעותיות ביותר ולשמירה
-    על מגוון בין הקטגוריות, ותכין תחזית מורחבת וברורה על סמך נתוני מזד האוויר המופיעים בטקסט שקיבלת בלבד.
+    על מגוון בין הקטגוריות, ותכין תחזית מורחבת וברורה על סמך נתוני מזג האוויר המופיעים בטקסט שקיבלת בלבד.
 
 19. אין לומר למאזינים כמה שעות של חדשות נאספו
     ואין לציין את טווח הזמן שממנו נאספו הידיעות.
@@ -256,36 +257,9 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 אין להשתמש בניסוחים כלליים, מעורפלים או חסרי הקשר כאשר ניתן לפרט את המידע
 מתוך הטקסט שקיבלת.
 
-לדוגמה:
-אין לומר "אחד מחברי הכנסת אמר" כאשר שם חבר הכנסת מופיע בטקסט.
-יש לומר את שמו המלא של חבר הכנסת.
-
-אין לומר "השר אמר" או "השר הגיב" כאשר ניתן לזהות את השר מתוך הטקסט.
-יש לציין את שמו ואת תפקידו.
-
-אין לומר "נעשה מעשה לא טוב", "אירע מקרה חמור", "התקבלה החלטה",
-"נמסרה תגובה", "היו התפתחויות" או ניסוחים כלליים דומים,
-כאשר העובדות שמסבירות מה בדיוק קרה מופיעות בטקסט.
-יש לפרט מה נעשה, מה קרה, איזו החלטה התקבלה או מה נאמר,
-כדי שהמאזין יבין בדיוק את משמעות הידיעה.
-
-כאשר יש צורך ברקע בסיסי כדי להבין את הידיעה, יש להסביר אותו בקצרה
-באמצעות העובדות שמופיעות בטקסט שנמסר לעריכה.
-
-אין להניח שהמאזין מכיר שמות, אירועים, החלטות או התפתחויות שהוזכרו בידיעה.
-אם ניתן להסביר את הקשר ביניהם מתוך החומר שנמסר, יש לעשות זאת.
-
-עם זאת, אסור להשלים פרטים חסרים באמצעות ניחוש או ידע שלא מופיע בטקסט.
-אין להמציא שמות, תפקידים, מעשים, סיבות, רקע, תאריכים או פרטים אחרים.
-
-אם ידיעה אינה ניתנת להבנה מלאה גם לאחר שימוש בכל המידע שמופיע בטקסט,
-ואין מספיק מידע כדי להסביר אותה בלי להמציא פרטים,
-יש להשמיט את הידיעה לחלוטין ולא להציג ידיעה חלקית או מעורפלת.
-
 מבנה המהדורה:
 
 {intro_text}
-
 
 הצג את הידיעות בהרחבה לפי הקטגוריות המתאימות,
 כאשר כל קטגוריה מופיעה רק אם יש בה ידיעות.
@@ -300,13 +274,10 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
 
         for attempt in range(1, max_attempts + 1):
             try:
-                print(
-                    f"Calling Gemini "
-                    f"(attempt {attempt}/{max_attempts})..."
-                )
+                print(f"Calling Gemini (attempt {attempt}/{max_attempts})...")
 
                 response = client.models.generate_content(
-                    model="gemini-3.5-flash",
+                    model="gemini-2.5-flash",
                     contents=f"""
 {system_prompt}
 
@@ -316,44 +287,21 @@ def edit_news_with_ai(news_text, folder, current_hour=None):
                 )
 
                 if not response.text:
-                    print(
-                        f"Gemini returned an empty response "
-                        f"on attempt {attempt}."
-                    )
-
+                    print(f"Gemini returned an empty response on attempt {attempt}.")
                     if attempt < max_attempts:
                         time.sleep(retry_delay)
                         continue
+                    raise RuntimeError("Gemini returned an empty response after all attempts.")
 
-                    raise RuntimeError(
-                        "Gemini returned an empty response after all attempts."
-                    )
-
-                print(
-                    "Successfully generated news using "
-                    "gemini-3.5-flash"
-                )
-
+                print("Successfully generated news using gemini-2.5-flash")
                 return response.text.strip()
 
             except Exception as e:
-                print(
-                    f"Gemini attempt {attempt}/{max_attempts} failed: {e}"
-                )
-
+                print(f"Gemini attempt {attempt}/{max_attempts} failed: {e}")
                 if attempt < max_attempts:
-                    print(
-                        f"Waiting {retry_delay} seconds before retry..."
-                    )
                     time.sleep(retry_delay)
                 else:
-                    print(
-                        "Gemini failed after all attempts. "
-                        "No edition will be created."
-                    )
-                    raise RuntimeError(
-                        "Gemini failed after all attempts."
-                    ) from e
+                    raise RuntimeError("Gemini failed after all attempts.") from e
 
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
