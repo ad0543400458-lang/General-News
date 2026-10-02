@@ -34,10 +34,9 @@ def is_shabbat_time(now_il):
     if weekday not in [4, 5, 6]:
         return False
 
-    # הגדרת מיקום (לדוגמה: ירושלים)
-    # GeoLocation(location_name, latitude, longitude, elevation, time_zone)
-    geo_location = GeoLocation("Jerusalem", 31.778, 35.235, 800, "Asia/Jerusalem")    
-    # יצירת לוח זמנים עבור התאריך הנוכחי
+    # שים לב: כאן בסוף השורה במקום לכתוב "Asia/Jerusalem", 
+    # צריך להיות כתוב בדיוק המשתנה TIMEZONE (בלי מרכאות!)
+    geo_location = GeoLocation("Jerusalem", 31.778, 35.235, 800, TIMEZONE)    
     zmanim_cal = ZmanimCalendar(geo_location=geo_location)
 
     if weekday == 4:  # יום שישי
