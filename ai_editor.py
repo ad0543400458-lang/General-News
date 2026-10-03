@@ -285,7 +285,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
                 print(f"Calling Gemini (attempt {attempt}/{max_attempts})...")
 
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-3.5-flash",
                     contents=f"""
 {system_prompt}
 
@@ -301,7 +301,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
                         continue
                     raise RuntimeError("Gemini returned an empty response after all attempts.")
 
-                print("Successfully generated news using gemini-1.5-flash")
+                print("Successfully generated news using gemini-3.5-flash")
                 return response.text.strip()
 
             except Exception as e:
