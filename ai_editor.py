@@ -278,7 +278,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 """
 
         max_attempts = 3
-        retry_delay = 120
+        retry_delay = 300
 
         for attempt in range(1, max_attempts + 1):
             try:
