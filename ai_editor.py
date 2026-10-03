@@ -37,21 +37,24 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
         print("GEMINI_API_KEY is missing, returning raw text.")
         return news_text
 
-    # --- הוספת הבדיקה כאן ---
-    # אם אין טקסט בכלל, או שהטקסט קצר מדי (למשל פחות מ-20 תווים או שאין ידיעות אמיתיות), 
-    # ניתן לנקות ולבדוק האם יש תוכן ממשי.
     if not news_text or len(news_text.strip()) < 20:
         print("News text is empty or too short, skipping edition creation.")
         return ""
-    # -----------------------
+
+    # ספירת מספר העדכונים (כל ידיעה מופרדת ב---)
+    items_count = len([x for x in news_text.split("---") if x.strip()])
 
     try:
         client = genai.Client(api_key=api_key)
 
-        # קביעת פתיח וסיום דינמיים לפי מספר השלוחה
+        # קביעת פתיח וסיום דינמיים לפי מספר השלוחה וכמות העדכונים
         folder_num = str(folder).strip()
+        edition_time_str = HOURS_HEBREW.get(current_hour, "בשעה זו") if current_hour is not None else "בשעה זו"
 
-        if folder_num == "2":
+        if folder_num == "1" and items_count < 2:
+            intro_text = f"השעה {edition_time_str} בחדשות המידע אתם מאזינים לעדכון קצר."
+            outro_text = "עד כאן."
+        elif folder_num == "2":
             intro_text = "עדכוני השכונה."
             outro_text = "עד כאן עדכוני השכונה."
         elif folder_num == "3":
@@ -134,6 +137,10 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 אין לאזכר או לחשוף את קיומן של ההגבלות הללו בתוצר הסופי.
 
 הוראות חובה לבניית המהדורה:
+
+שימו לב למבנה המהדורה בהתאם לכמות העדכונים (רלוונטי לשלוחה 1 בלבד):
+- בשלוחה 1, אם יש פחות משני עדכונים: אין לחלק לקטגוריות כלל, אין להציג כותרות בנפרד בתחילת הדיווח, אלא להציג את הידיעה ברצף בצורה קולחת וטבעית.
+- בשלוחות האחרות, או כאשר יש שני עדכונים ומעלה בשלוחה 1: פעל לפי מבנה הקטגוריות והכותרות הרגיל המוגדר עבור השלוחה.
 
 מבנה הדיווח לשלוחה 1 בלבד:
    א. תחילה הצג את "הכותרות" - תמצית קצרה של המשפט/הנושא המרכזי של כל ידיעה חשובה (משפט אחד קצר לכל כותרת).
