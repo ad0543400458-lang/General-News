@@ -51,7 +51,8 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
         folder_num = str(folder).strip()
         edition_time_str = HOURS_HEBREW.get(current_hour, "בשעה זו") if current_hour is not None else "בשעה זו"
 
-        if folder_num == "1" and items_count < 2:
+        if folder_num == "1" and items_count < 3:
+            edition_time_str = edition_time_str.replace("מהדורת ", "")
             intro_text = f"השעה {edition_time_str} אתם מאזינים לעדכון קצר."
             outro_text = "עד כאן."
         elif folder_num == "2":
