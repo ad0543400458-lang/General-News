@@ -292,7 +292,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
                 print(f"Calling Gemini (attempt {attempt}/{max_attempts})...")
 
                 response = client.models.generate_content(
-                    model="gemini-3.5-flash-lite"",
+                    model="gemini-3.5-flash-lite",
                     contents=f"""
 {system_prompt}
 
