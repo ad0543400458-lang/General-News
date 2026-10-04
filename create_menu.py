@@ -1,6 +1,7 @@
 import os
 import feedparser
-from gtts import gTTS
+import asyncio
+import edge_tts
 import requests
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -24,15 +25,18 @@ def fetch_news():
             print(f"שגיאה באיסוף חדשות מ-{url}: {e}")
     return articles
 
-def create_audio(text_list):
+async def create_audio_async(text_list):
     print("יוצר קובץ שמע...")
     full_text = " שלום. הנה מבזק החדשות המעודכן. " + " ".join(text_list)
     
-    # המרת הטקסט לקובץ דיבור (עברית)
-    tts = gTTS(text=full_text, lang='he')
+    # המרת הטקסט לקובץ דיבור (עברית) באמצעות edge-tts
     output_filename = "news_update.mp3"
-    tts.save(output_filename)
+    communicate = edge_tts.Communicate(full_text, "he-IL-HilaNeural")
+    await communicate.save(output_filename)
     print(f"קובץ השמע נוצר בהצלחה: {output_filename}")
+
+def create_audio(text_list):
+    asyncio.run(create_audio_async(text_list))
 
 def run_main_task():
     try:
