@@ -1,7 +1,9 @@
 import os
+import re
 import time
 from datetime import datetime
 from google import genai
+from google.genai import types
 
 HOURS_HEBREW = {
     0: "מהדורת חצות",
@@ -30,6 +32,39 @@ HOURS_HEBREW = {
     23: "מהדורת אחת עשרה בלילה"
 }
 
+
+def prepare_text_for_tts(text):
+    """שיפורי הקראה מינימליים: ניקוי תווי עיצוב והמרת ראשי תיבות נפוצים"""
+    if not text:
+        return ""
+
+    text = re.sub(r'[*#_~`]+', '', text)
+
+    replacements = {
+        'צה"ל': 'צבא ההגנה לישראל',
+        'רה"מ': 'ראש הממשלה',
+        'ח"כ': 'חבר הכנסת',
+        'ח"כים': 'חברי כנסת',
+        'יו"ר': 'יושב ראש',
+        'מנכ"ל': 'מנהל כללי',
+        'מפכ"ל': 'מפקח כללי',
+        'בע"ה': 'בעזרת השם',
+        'ב"ה': 'ברוך השם',
+        'שליט"א': 'שליטא',
+        'זצ"ל': 'זכר צדיק לברכה',
+        'ז"ל': 'זכרונו לברכה',
+        'ע"פ': 'על פי',
+        'וכו\'': 'וכולי',
+        'וכו"': 'וכולי',
+    }
+    for abbr, full in replacements.items():
+        text = text.replace(abbr, full)
+
+    text = re.sub(r'([.,])([^\s\d"])', r'\1 \2', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+
 def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
     api_key = os.environ.get("GEMINI_API_KEY")
 
@@ -41,14 +76,14 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
         print("News text is empty or too short, skipping edition creation.")
         return ""
 
-    # ספירת מספר העדכונים (כל ידיעה מופרדת ב---)
     items_count = len([x for x in news_text.split("---") if x.strip()])
 
     try:
         client = genai.Client(api_key=api_key)
 
-        # קביעת פתיח וסיום דינמיים לפי מספר השלוחה וכמות העדכונים
         folder_num = str(folder).strip()
+        tz = TIMEZONE if TIMEZONE else datetime.now().astimezone().tzinfo
+        current_weekday = datetime.now(tz).weekday()
         edition_time_str = HOURS_HEBREW.get(current_hour, "בשעה זו") if current_hour is not None else "בשעה זו"
 
         if folder_num == "1":
@@ -57,8 +92,33 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
                 intro_text = f"השעה {clean_time} אתם מאזינים לעדכון קצר."
                 outro_text = "עד כאן."
             else:
-                intro_text = f"אתם מאזינים ל{edition_time_str} בחדשות המידע."
-                outro_text = "עד כאן המהדורה תודה ולהתראות במהדורה הבאה."
+                if current_weekday == 4 and current_hour is not None and current_hour >= 12:
+                    outro_text = "עד כאן המהדורה. אנו מאחלים למאזיננו ולכל עם ישראל שבת שלום ושקטה נשוב בעזרת השם במוצאי השבת."
+                elif current_weekday == 5 or (current_weekday == 6 and current_hour is not None and current_hour < 4):
+                    outro_text = "עד כאן מהדורת מוצאי השבת. תודה ולהתראות במהדורה הבאה."
+                else:
+                    outro_text = "עד כאן המהדורה תודה ולהתראות במהדורה הבאה."
+
+                if current_weekday == 5 or (current_weekday == 6 and current_hour is not None and current_hour < 4):
+                    intro_text = "שבוע טוב! אתם מאזינים למהדורת מוצאי שבת המורחבת, סיכום חדשות השבת."
+                elif current_hour is not None and current_hour in HOURS_HEBREW:
+                    extended_editions = {7: "מורחבת", 14: "מורחבת", 19: "מורחבת"}
+                    if current_hour == 0:
+                        intro_text = (
+                            "אתם מאזינים, למהדורת חצות המורחבת, "
+                            "סיכום חדשות היום, בחדשות המידע."
+                        )
+                    elif current_hour in extended_editions:
+                        intro_text = (
+                            f"אתם מאזינים, למהדורה "
+                            f"{extended_editions[current_hour]}, "
+                            f"{edition_time_str} בחדשות המידע."
+                        )
+                    else:
+                        intro_text = f"אתם מאזינים ל{edition_time_str} בחדשות המידע."
+                else:
+                    intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
+
         elif folder_num == "2":
             intro_text = "עדכוני השכונה."
             outro_text = "עד כאן עדכוני השכונה."
@@ -72,40 +132,8 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
             intro_text = "עדכון תחזית."
             outro_text = "עד כאן עדכון התחזית."
         else:
-            # ברירת מחדל למהדורה המרכזית (שלוחה 1)
-            tz = TIMEZONE if TIMEZONE else datetime.now().astimezone().tzinfo
-            current_weekday = datetime.now(tz).weekday()
-            
-            if current_weekday == 4: # ערב שבת (יום שישי)
-                outro_text = "עד כאן המהדורה. אנו מאחלים למאזיננו ולכל עם ישראל שבת שלום ושקטה נשוב בעזרת השם במוצאי השבת."
-            elif current_weekday == 5 or (current_weekday == 6 and (current_hour is not None and current_hour < 4)): # מוצאי שבת
-                intro_text = "שבוע טוב! אתם מאזינים למהדורת מוצאי שבת המורחבת, סיכום חדשות השבת."
-                outro_text = "עד כאן מהדורת מוצאי השבת. תודה ולהתראות במהדורה הבאה."
-            else:
-                outro_text = "עד כאן המהדורה. תודה ולהתראות במהדורה הבאה."
-
-            if current_hour is not None and current_hour in HOURS_HEBREW:
-                edition_time_str = HOURS_HEBREW[current_hour]
-                extended_editions = {7: "מורחבת", 14: "מורחבת", 19: "מורחבת"}
-
-                if current_hour == 0:
-                    intro_text = (
-                        "אתם מאזינים, למהדורת חצות המורחבת, "
-                        "סיכום חדשות היום, בחדשות המידע."
-                    )
-                elif current_hour in extended_editions:
-                    intro_text = (
-                        f"אתם מאזינים, למהדורה "
-                        f"{extended_editions[current_hour]}, "
-                        f"{edition_time_str} בחדשות המידע."
-                    )
-                else:
-                    intro_text = (
-                        f"אתם מאזינים, ל{edition_time_str} "
-                        f"בחדשות המידע."
-                    )
-            else:
-                intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
+            intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
+            outro_text = "עד כאן המהדורה. תודה ולהתראות במהדורה הבאה."
 
         system_prompt = f"""
 אתה עורך החדשות הראשי של תחנת רדיו.
@@ -126,13 +154,13 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
   אם יש יותר מ-3 ידיעות, סדר את הידיעות לפי קטגוריות החדשות המוגדרות בהמשך.
 
 - שלוחה 2: הכנס רק ידיעות שיש להן קשר ממשי ורלוונטי לרמת שלמה או לסביבה המיידית שלה ופרט את כל המידע שיש על העדכון. ידיעה כללית על ירושלים שאינה רלוונטית בפועל לרמת שלמה — השמט.
-- שלוחה 3: הכנס רק ידיעות העוסקות בנושא ירידת מחירי הדירות בארץ, רק ידיעות המבשרות על ירידת מחירי הדיר בלבד או מהלכים או מצבים שיגרמו בוודאות או בסברות גבוהה לירידת מחירי הדיור.
+- שלוחה 3: הכנס רק ידיעות העוסקות בנושא ירידת מחירי הדירות בארץ, רק ידיעות המבשרות על ירידת מחירי הדיור בלבד או מהלכים או מצבים שיגרמו בוודאות או בסברות גבוהה לירידת מחירי הדיור.
 - שלוחה 4: הכנס רק ידיעות הקשורות לתחבורה, כבישים, תאונות, חסימות, עומסי תנועה, רכבות, תחבורה ציבורית ושינויים משמעותיים בדרכים.
 - שלוחה 5: הכנס רק ידיעות הקשורות למזג האוויר ולתחזית.
  אמור בפתיח את היום והשעה לדוגמה עדכון תחזית נכון ליום שלישי שבע בערב. 
- 1. סדר את התחזית לפי ימים (היום, מחר, והימים הקרובים) בצורה ברורה וקולחת להקראה.
- 2. כלול נתונים על על המצב הכללי של התחזית בארץ בלבד במידה והם מופיעים בטקסט.
- 3. איסור מוחלט על המצאת ימים, טמפרטורות או מצבי אוויר שלא צוינו במפורש בטקסט המקורי. אם מצויינים נתונים רק ליומיים הקרובים – הציגו רק אותם.
+1. סדר את התחזית לפי ימים (היום, מחר, והימים הקרובים) בצורה ברורה וקולחת להקראה.
+2. כלול נתונים על המצב הכללי של התחזית בארץ בלבד במידה והם מופיעים בטקסט.
+3. איסור מוחלט על המצאת ימים, טמפרטורות או מצבי אוויר שלא צוינו במפורש בטקסט המקורי. אם מצויינים נתונים רק ליומיים הקרובים – הציגו רק אותם.
  4.באם יש מחלוקת משמעותית בין מודלים או בין חזאים שונים ניתן לפרט שלפי מודל .. כך ולפי מודל... כך, אפשר לומר שמות חזאים או אתרים של מזג האוויר כשמביאים תחזית משמם. 
 
 חשוב במיוחד בשלוחות 2 עד 5:
@@ -166,7 +194,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
   3. לאחר מכן עבור ל"חדשות בהרחבה".
   4. סדר את החדשות בהרחבה לפי הקטגוריות המוגדרות בהמשך.
   5. תחזית מזג האוויר תהיה הקטגוריה האחרונה.
-  6. סיים בדיוק במשפט: "עד כאן המהדורה תודה ולהתראות במהדורה הבאה".
+  6. סיים בדיוק במשפט: "{outro_text}"
 
 מבנה הדיווח בשלוחה 1 כאשר יש יותר מ-3 ידיעות:
 א. תחילה הצג את "הכותרות" - תמצית קצרה של הנושא המרכזי של כל ידיעה חשובה.
@@ -176,7 +204,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 
 1. שכתב את הידיעות בלשונך בצורה טבעית וברורה.
 - הרחבת נפח ועומק (נפח ופירוט): אל תסתפק בתמצות מינימלי של הידיעה. לכל ידיעה מרכזית, הוסף משפט או שניים של הרקע הציבורי, הכלכלי או ההקשר הרחב סביב האירוע, כדי לתת למאזין תמונה מלאה, עשירה ומעניינת יותר להקראה.
-    - מניעת קיצוץ יתר: הימנע מניסוחים קצרים מדי או חלקיים. כל ידיעה צריכה לקבל נפח מכובד שמאפשר האזנה זורמת ומלאה.
+  - מניעת קיצוץ יתר: הימנע מניסוחים קצרים מדי או חלקיים. כל ידיעה צריכה לקבל נפח מכובד שמאפשר האזנה זורמת ומלאה.
  
 2. שמור באופן מוחלט על העובדות המופיעות בטקסט המקורי.
 
@@ -208,12 +236,12 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
    שמתאימות בבירור לקטגוריה זו.
 
 6. תחזית לסיום חייבת להיות תמיד הקטגוריה האחרונה - מבנה התחזית לסיום: 
- * במהדורות רגילות, הצג תחזית קצרה ותמציתית המתארת בקצרה את מצב האוויר והטמפרטורות הצפויות.
- * במהדורות מורחבות (כגון מהדורת חצות או המהדורות המרכזיות), הרחב מעט יותר על המגמה הצפויה בימים הקרובים בהתאם לנתונים שבטקסט.
- * הקפד על ניסוח טבעי המותאם להקראה קולית ברדיו, ואל תמציא נתונים או מספרים שלא הופיעו במפורש בטקסט המקורי שקיבלת..
- *  יש להסתמך אך ורק על הנתונים, הימים והטמפרטורות המופיעים בטקסט שנשלח אליך.
- *  אין לנחש או להשלים תחזית לימים חסרים.
- *  הציגו את המידע בניסוח טבעי המותאם להקראה ברדיו.
+- במהדורות רגילות, הצג תחזית קצרה ותמציתית המתארת בקצרה את מצב האוויר והטמפרטורות הצפויות.
+- במהדורות מורחבות (כגון מהדורת חצות או המהדורות המרכזיות), הרחב מעט יותר על המגמה הצפויה בימים הקרובים בהתאם לנתונים שבטקסט.
+- הקפד על ניסוח טבעי המותאם להקראה קולית ברדיו, ואל תמציא נתונים או מספרים שלא הופיעו במפורש בטקסט המקורי שקיבלת..
+-  יש להסתמך אך ורק על הנתונים, הימים והטמפרטורות המופיעים בטקסט שנשלח אליך.
+-  אין לנחש או להשלים תחזית לימים חסרים.
+-  הציגו את המידע בניסוח טבעי המותאם להקראה ברדיו.
 
 7. בשלוחה 1 בלבד הצג שם של קטגוריה רק אם קיימת לפחות ידיעה אחת
    השייכת לאותה קטגוריה.
@@ -264,7 +292,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
     שמור על איזון עדיף כך שההוספות הללו יימעטו להופיע וייכנסו רק היכן שהם משתלבים באופן טבעי לחלוטין באופי הטקסט, מבלי להפוך למלאכותיים.
 
 11. קו מערכתי והשקפתי:
-    - שמור על שפה נקייה ומכובדת, באווירה מסורתית ומותאמת.
+- שמור על שפה נקייה ומכובדת, באווירה מסורתית ומותאמת.
      וקו חדשותי המעדיף נקודת מבט ימנית ומסורתית, גישה ימנית ואנטי שמאל,
      בעד אנשי ימין ונגד אנשי שמאל.
 
@@ -314,7 +342,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 """
 
         max_attempts = 3
-        retry_delay = 300
+        retry_delay = 15
 
         for attempt in range(1, max_attempts + 1):
             try:
@@ -322,23 +350,23 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 
                 response = client.models.generate_content(
                     model="gemini-3.5-flash-lite",
-                    contents=f"""
-{system_prompt}
-
-טקסט הידיעות לעריכה:
-{news_text}
-""",
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        temperature=0.3,
+                    ),
+                    contents=f"טקסט הידיעות לעריכה:\n{news_text}",
                 )
 
-                if not response.text:
+                if response.text is None:
                     print(f"Gemini returned an empty response on attempt {attempt}.")
                     if attempt < max_attempts:
                         time.sleep(retry_delay)
                         continue
                     raise RuntimeError("Gemini returned an empty response after all attempts.")
 
+                cleaned_output = prepare_text_for_tts(response.text)
                 print("Successfully generated news using gemini-3.5-flash-lite")
-                return response.text.strip()
+                return cleaned_output
 
             except Exception as e:
                 print(f"Gemini attempt {attempt}/{max_attempts} failed: {e}")
