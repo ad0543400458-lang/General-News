@@ -120,16 +120,16 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
                     intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
 
         elif folder_num == "5":
-            intro_text = f"עדכון תחזית, השעה {clean_time_str} ({exact_time_str})."
+            intro_text = f"עדכון תחזית, השעה {clean_time_str}."
             outro_text = "עד כאן עדכון התחזית."
         elif folder_num == "6":
-            intro_text = f"עדכוני התנועה, השעה {clean_time_str} ({exact_time_str})."
+            intro_text = f"עדכוני התנועה, השעה {clean_time_str}."
             outro_text = "עד כאן עדכוני התנועה."
         elif folder_num == "7":
-            intro_text = f"עדכון ירידות מחירי הדיור, השעה {clean_time_str} ({exact_time_str})."
+            intro_text = f"עדכון ירידות מחירי הדיור, השעה {clean_time_str}."
             outro_text = "עד כאן עדכוני הנדל\"ן והכלכלה."
         elif folder_num == "8":
-            intro_text = f"עדכוני השכונה, השעה {clean_time_str} ({exact_time_str})."
+            intro_text = f"עדכוני השכונה, השעה {clean_time_str}."
             outro_text = "עד כאן עדכוני השכונה."
         else:
             intro_text = "אתם מאזינים, למהדורת החדשות בחדשות המידע."
