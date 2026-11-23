@@ -346,12 +346,12 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 {outro_text}
 """
 
-        max_attempts = 3
-        retry_delay = 15
+        retry_delays = [15, 60, 180, 300, 600]
+        total_attempts = len(retry_delays) + 1
 
-        for attempt in range(1, max_attempts + 1):
+        for attempt in range(1, total_attempts + 1):
             try:
-                print(f"Calling Gemini (attempt {attempt}/{max_attempts})...")
+                print(f"Calling Gemini (attempt {attempt}/{total_attempts})...")
 
                 response = client.models.generate_content(
                     model="gemini-3.5-flash-lite",
@@ -364,8 +364,10 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 
                 if response.text is None:
                     print(f"Gemini returned an empty response on attempt {attempt}.")
-                    if attempt < max_attempts:
-                        time.sleep(retry_delay)
+                    if attempt < total_attempts:
+                        wait_sec = retry_delays[attempt - 1]
+                        print(f"Waiting {wait_sec} seconds before next attempt...")
+                        time.sleep(wait_sec)
                         continue
                     raise RuntimeError("Gemini returned an empty response after all attempts.")
 
@@ -374,9 +376,11 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
                 return cleaned_output
 
             except Exception as e:
-                print(f"Gemini attempt {attempt}/{max_attempts} failed: {e}")
-                if attempt < max_attempts:
-                    time.sleep(retry_delay)
+                print(f"Gemini attempt {attempt}/{total_attempts} failed: {e}")
+                if attempt < total_attempts:
+                    wait_sec = retry_delays[attempt - 1]
+                    print(f"Waiting {wait_sec} seconds before next attempt...")
+                    time.sleep(wait_sec)
                 else:
                     raise RuntimeError("Gemini failed after all attempts.") from e
 
