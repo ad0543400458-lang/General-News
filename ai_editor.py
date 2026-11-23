@@ -346,7 +346,7 @@ def edit_news_with_ai(news_text, folder, current_hour=None, TIMEZONE=None):
 {outro_text}
 """
 
-        retry_delays = [15, 60, 180, 300, 600]
+        retry_delays = [10, 20, 40, 90]
         total_attempts = len(retry_delays) + 1
 
         for attempt in range(1, total_attempts + 1):
