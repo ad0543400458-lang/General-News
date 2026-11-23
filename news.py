@@ -210,32 +210,31 @@ categories = {
         "keywords": [],
         "max_age_seconds": 3600  # ברירת מחדל: שעה אחת
     },
-    "2": {
-        "name": "רמת שלמה",
-        "sources": sources_ramat_shlomo,
-        "keywords": [],
-        "max_age_seconds": 86400
-    },
-   "3": {
-        "name": "כלכלה ונדל\"ן",
-        "sources": sources_economy,
-        "keywords": [],
-        "max_age_seconds": 21600
-    },
-    "4": {
-        "name": "תחבורה",
-        "sources": sources_transport,
-        "keywords": [],
-        "max_age_seconds": 21600
-    },
     "5": {
         "name": "מזג אוויר",
         "sources": sources_weather,
         "keywords": [],
         "max_age_seconds": 21600
+    },
+    "6": {
+        "name": "תחבורה",
+        "sources": sources_transport,
+        "keywords": [],
+        "max_age_seconds": 21600
+    },
+    "7": {
+        "name": "כלכלה ונדל\"ן",
+        "sources": sources_economy,
+        "keywords": [],
+        "max_age_seconds": 21600
+    },
+    "8": {
+        "name": "רמת שלמה",
+        "sources": sources_ramat_shlomo,
+        "keywords": [],
+        "max_age_seconds": 86400
     }
 }
-
 def main():
     old_news = load_history()
     old_news_set = set(old_news)
@@ -244,10 +243,10 @@ def main():
     # שעות הפעלה מוגדרות לכל שלוחה (None = רץ בכל שעה)
     SCHEDULED_HOURS = {
         "1": None,              # שעה-שעה (רציף)
-        "2": [0, 7, 14, 19],      # רמת שלמה: 4 פעמים ביום בלבד
-        "3": [0, 7, 14, 19],
-        "4": [0, 7, 14, 19],
-        "5": [0, 7, 14, 19]
+        "5": [0, 7, 14, 19],      # רמת שלמה: 4 פעמים ביום בלבד
+        "6": [0, 7, 14, 19],
+        "7": [0, 7, 14, 19],
+        "8": [0, 7, 14, 19]
     }
 
     # חלון איסוף מורחב לשלוחה 1 בשעות המהדורות המרכזיות
