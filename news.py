@@ -10,6 +10,7 @@ import edge_tts
 from datetime import datetime, timezone
 from pydub import AudioSegment
 from ai_editor import edit_news_with_ai
+from google import genai
 
 async def create_tts(text, output_file):
     # ניתן לשנות את הקצב (למשל "+10%" להאצה קלה, "+15%" להאצה משמעותית יותר, או "-10%" להאטה)
@@ -235,6 +236,265 @@ categories = {
         "max_age_seconds": 86400
     }
 }
+
+
+def run_truth_segment(now_il):
+    """יצירת קטע יומי: בדיקת הצהרות ופערים בפוליטיקה והעלאה לשלוחה 2."""
+
+    if now_il.hour != 14:
+        return
+
+    token = os.environ.get("YEMOT_TOKEN", "")
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+
+    if not token or not api_key:
+        print("Truth segment skipped: missing API keys.")
+        return
+
+    date_tag = now_il.strftime("%Y%m%d")
+    marker_name = f"truth_{date_tag}.txt"
+
+    list_url = "https://www.call2all.co.il/ym/api/GetIVR2Dir"
+    upload_url = "https://www.call2all.co.il/ym/api/UploadFile"
+
+    try:
+        # בדיקה אם כבר נוצר קטע היום
+        response = requests.post(
+            list_url,
+            data={"token": token, "path": "ivr2:/2/"},
+            timeout=30
+        )
+        response.raise_for_status()
+
+        files_data = response.json()
+        existing_files = [
+            f.get("name", "") for f in files_data.get("files", [])
+        ]
+
+        if marker_name in existing_files:
+            print("Truth segment already uploaded today.")
+            return
+
+        # מקורות חדשות ממוקדים
+        sources = [
+            "https://news.google.com/rss/search?q=פוליטיקה+ישראל&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=הצהרות+פוליטיקאים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=הבטחות+ממשלה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=חברי+כנסת+התבטאות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=ממשלה+החלטות+ביקורת&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שרים+אמרו+בעבר&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=פוליטיקה+ישראל&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=הצהרות+פוליטיקאים&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=הבטחות+ממשלה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=חברי+כנסת+התבטאות&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שרים+אמרו+בעבר&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=פוליטיקאי+הבטיח+בעבר&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=שינה+את+עמדתו+פוליטיקה&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=הצבעה+קודמת+הצהרה+שר&hl=he&gl=IL&ceid=IL:he",
+            "https://news.google.com/rss/search?q=ציטוטים+קודמים+פוליטיקאים&hl=he&gl=IL&ceid=IL:he",
+          
+        ]
+
+        news_items = []
+        seen_links = set()
+
+        for source in sources:
+            try:
+                feed = feedparser.parse(source, agent=USER_AGENT)
+
+                for item in feed.entries[:20]:
+                    link = getattr(item, "link", "")
+
+                    if not link or link in seen_links:
+                        continue
+
+                    seen_links.add(link)
+
+                    title = getattr(item, "title", "")
+                    summary = getattr(item, "summary", "")
+
+                    if not title and not summary:
+                        continue
+
+                    news_items.append(
+                        f"כותרת: {title}\n"
+                        f"תוכן: {summary}\n"
+                        f"קישור מקור: {link}"
+                    )
+
+            except Exception as e:
+                print(f"Truth RSS error: {e}")
+
+        if not news_items:
+            print("No political news found for truth segment.")
+            return
+
+        raw_text = "\n\n---\n\n".join(news_items)
+
+        # יצירת בדיקת עובדות באמצעות Gemini
+        client = genai.Client(api_key=api_key)
+
+        prompt = f"""
+אתה עורך תחקירים עיתונאיים.
+
+מטרת הקטע היא לחשוף פערים אמיתיים בין הצהרות של אנשי ציבור,
+הבטחות פוליטיות, הצבעות, החלטות ומעשים.
+
+עליך לבדוק את החדשות שהתקבלו ולחפש מקרה אחד בלבד
+שבו יש ראיה ברורה לפער משמעותי בין אמירה קודמת
+לבין אמירה או מעשה מאוחרים יותר.
+
+כללים מחייבים:
+
+1. אסור להמציא ציטוטים, תאריכים, אירועים או עובדות.
+2. אין לקבוע שאדם שיקר אם אין לכך הוכחה.
+3. יש להבחין בין שינוי עמדה, סתירה, הבטחה שלא קוימה
+   וטענה שקרית. אלה אינם אותו הדבר.
+4. כדי לפרסם סתירה בין שתי אמירות, שתי האמירות חייבות
+   להופיע במפורש בטקסט המקורות שסופק.
+5. אם אין שתי אמירות מפורשות, אין לפרסם סתירה.
+6. אין להסתמך על זיכרון כללי או ידע חיצוני.
+7. יש לבחור רק נושא הקשור ישירות לחדשות האקטואליות.
+8. אם אין ממצא משמעותי ומבוסס, יש להחזיר publish=false.
+9. אין ליצור קטע רק כדי למלא את השלוחה.
+10. הקטע צריך להיות קצר, חד, מעניין וברור להקראה,
+    באורך של כדקה לכל היותר.
+
+החזר JSON בלבד במבנה הבא:
+
+{{
+  "publish": true,
+  "headline": "כותרת קצרה",
+  "current_quote": "ציטוט מדויק מהמקורות",
+  "previous_quote": "ציטוט מדויק מהמקורות",
+  "explanation": "הסבר עובדתי קצר על הפער",
+  "sources": ["קישור מקור ראשון", "קישור מקור שני"]
+}}
+
+אם אין ממצא מתאים, החזר:
+
+{{
+  "publish": false
+}}
+
+החדשות והמקורות:
+{raw_text}
+"""
+
+        response = client.models.generate_content(
+            model="gemini-3.5-flash-lite",
+            contents=prompt
+        )
+
+        if not response.text:
+            print("Gemini returned empty truth segment.")
+            return
+
+        result_text = response.text.strip()
+        result_text = re.sub(r"^```(?:json)?\s*", "", result_text)
+        result_text = re.sub(r"\s*```$", "", result_text)
+
+        result = json.loads(result_text)
+
+        if not result.get("publish"):
+            print("No sufficiently verified finding. Nothing uploaded.")
+            return
+
+        current_quote = result.get("current_quote", "").strip()
+        previous_quote = result.get("previous_quote", "").strip()
+        explanation = result.get("explanation", "").strip()
+        headline = result.get("headline", "").strip()
+        selected_sources = result.get("sources", [])
+
+        # אימות שהציטוטים והמקורות אכן נמצאים בחומר שנאסף
+        if (
+            len(current_quote) < 15
+            or len(previous_quote) < 15
+            or current_quote not in raw_text
+            or previous_quote not in raw_text
+            or len(set(selected_sources)) < 2
+            or any(source not in raw_text for source in selected_sources)
+            or not explanation
+            or not headline
+        ):
+            print("Truth segment failed source verification. Nothing uploaded.")
+            return
+
+        final_text = (
+            "האמת שמאחורי הפוליטיקה.\n\n"
+            f"{headline}.\n\n"
+            f"ההתבטאות שפורסמה כעת: {current_quote}.\n\n"
+            f"ומנגד, בהתבטאות קודמת נאמר: {previous_quote}.\n\n"
+            f"{explanation}\n\n"
+            "אנחנו נמשיך לבדוק את העובדות שמאחורי הכותרות."
+        )
+
+        # יצירת קובץ שמע
+        mp3_name = "truth_segment.mp3"
+        wav_name = "truth_segment.wav"
+
+        asyncio.run(create_tts(final_text, mp3_name))
+
+        audio = AudioSegment.from_mp3(mp3_name)
+        audio = audio.set_frame_rate(8000)
+        audio = audio.set_channels(1)
+        audio = audio.set_sample_width(2)
+        audio.export(wav_name, format="wav")
+
+        # מציאת המספר הבא בשלוחה 2
+        max_number = 0
+
+        for file in files_data.get("files", []):
+            name = file.get("name", "")
+            match = re.match(r"^(\d+)\.wav$", name, re.IGNORECASE)
+
+            if match:
+                max_number = max(max_number, int(match.group(1)))
+
+        new_number = str(max_number + 1).zfill(3)
+
+        with open(wav_name, "rb") as audio_file:
+            upload_response = requests.post(
+                upload_url,
+                files={"file": audio_file},
+                data={
+                    "token": token,
+                    "path": f"ivr2:/2/{new_number}.wav",
+                    "convertAudio": "1"
+                },
+                timeout=60
+            )
+
+        upload_response.raise_for_status()
+        upload_data = upload_response.json()
+
+        if upload_data.get("responseStatus") != "OK":
+            raise RuntimeError(f"Yemot upload failed: {upload_data}")
+
+        # סימון שהתהליך כבר בוצע היום
+        marker_response = requests.post(
+            upload_url,
+            files={"file": (marker_name, date_tag.encode("utf-8"))},
+            data={
+                "token": token,
+                "path": f"ivr2:/2/{marker_name}"
+            },
+            timeout=30
+        )
+
+        marker_response.raise_for_status()
+
+        print(f"Truth segment uploaded successfully: 2/{new_number}.wav")
+
+    except Exception as e:
+        print(f"Truth segment failed: {e}")
+
+    finally:
+        for filename in ["truth_segment.mp3", "truth_segment.wav"]:
+            if os.path.exists(filename):
+                os.remove(filename)
+
+
 def main():
     old_news = load_history()
     old_news_set = set(old_news)
@@ -262,6 +522,9 @@ def main():
         print("Shabbat mode active - skipping regular news run.")
         return
 
+         # קטע יומי: האמת שמאחורי הפוליטיקה
+    run_truth_segment(now_il)
+    
     for folder, category in categories.items():
         # בדיקה אם השלוחה מתוכננת לרוץ בשעה הנוכחית
         allowed_hours = SCHEDULED_HOURS.get(str(folder))
